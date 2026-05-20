@@ -1,3 +1,36 @@
-/Debug
-/Binaries
-.settings
+# macOS
+.DS_Store
+**/.DS_Store
+
+# STM32CubeIDE / Eclipse workspace metadata
+.settings/
+.metadata/
+
+# Build outputs
+Debug/
+Release/
+build/
+cmake-build-*/
+*.elf
+*.bin
+*.hex
+*.map
+*.list
+*.lst
+*.o
+*.d
+*.su
+*.cyclo
+*.gcno
+*.gcda
+*.gcov
+
+# Debug / launch configs
+*.launch
+
+# Logs / temp files
+*.log
+*.tmp
+*.bak
+*.swp
+*~
