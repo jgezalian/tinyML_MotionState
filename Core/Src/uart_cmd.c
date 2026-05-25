@@ -78,6 +78,12 @@ void UartCmd_ProcessPending(void)
     }
 }
 
+void UartCmd_PrintGeneral(char *str)
+{
+    char tx_buffer[strlen(str) + 1];
+    int n = snprintf(tx_buffer, sizeof(tx_buffer), str);
+    HAL_UART_Transmit(&huart2, (uint8_t *)tx_buffer, (uint16_t)n, 100);
+}
 void UartCmd_PrintStatus()
 {
     char tx_buffer[96];
@@ -98,9 +104,47 @@ void UartCmd_PrintSensorStatus(const char **SensorStatuses)
 
 void UartCmd_PrintSensorInitOk()
 {
-    char tx_buffer[19];
-    int n = snprintf(tx_buffer, sizeof(tx_buffer), "\r\nSensor INIT OK\r\n");
+    char *str = "SENSOR INIT OK \r\n";
+    char tx_buffer[strlen(str) + 1];
+    int n = snprintf(tx_buffer, sizeof(tx_buffer), str);
     HAL_UART_Transmit(&huart2, (uint8_t *)tx_buffer, (uint16_t)n, 100);
+}
+
+void UartCmd_PrintSensorReadReady(char *sensor_name)
+{
+    char *str = "%s READY TO READ DATA \r\n";
+    char tx_buffer[strlen(str) + strlen(sensor_name) + 1];
+    int n = snprintf(tx_buffer, sizeof(tx_buffer), str, sensor_name);
+    HAL_UART_Transmit(&huart2, (uint8_t *)tx_buffer, (uint16_t)n, 100);
+}
+
+void UartCmd_PrintLSM6DSV16XData(float *data)
+{
+    char *str = "\r\naccel_x: %.4f accel_y: %.4f accel_z: %.4f \r\n\
+	   \r\ngyro_x: %.4f gyro_y: %.4f gyro_z: %.4f\r\n";
+    char tx_buffer[128];
+    int n = snprintf(tx_buffer, sizeof(tx_buffer), str, data[0], data[1], data[2], data[3], data[4], data[5]);
+    HAL_UART_Transmit(&huart2, (uint8_t *)tx_buffer, (uint16_t)n, 100);
+}
+
+void UartCmd_PrintLSM6DSV16XDataCSV(const LSM6DSV16X_Sample *LSM6DSV16X_Sample)
+{
+    char *str = "%lu,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f\r\n";
+    uint32_t timestamp = HAL_GetTick();
+    char tx_buffer[160];
+    float ax_g = LSM6DSV16X_Sample->ax_g;
+    float ay_g = LSM6DSV16X_Sample->ay_g;
+    float az_g = LSM6DSV16X_Sample->az_g;
+    float dps_x = LSM6DSV16X_Sample->dps_x;
+    float dps_y = LSM6DSV16X_Sample->dps_y;
+    float dps_z = LSM6DSV16X_Sample->dps_z;
+    int n = snprintf(tx_buffer, sizeof(tx_buffer), str, timestamp, ax_g, ay_g, az_g, dps_x, dps_y, dps_z);
+
+    if (n > 0 && n < sizeof(tx_buffer))
+    {
+
+        HAL_UART_Transmit(&huart2, (uint8_t *)tx_buffer, (uint16_t)n, 100);
+    }
 }
 
 void UartCmd_PrintHelp(void)

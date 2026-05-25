@@ -67,10 +67,13 @@ static void MX_TIM2_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+
+volatile bool LSM6DSV16X_sample_due = false;
+volatile bool led_tick_due = false;
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
-    Led_TimerTick();
-    LSM6DSV16X_ReadData();
+    LSM6DSV16X_sample_due = true;
+    led_tick_due = true;
 }
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
@@ -115,9 +118,20 @@ int main(void)
     HAL_TIM_Base_Start_IT(&htim2);
     Button_Init();
     Led_Init();
-    bool sensor_check = Sensors_Init();
-    bool sensor_read_ready = Sensors_Read_Ready();
+    if (!Sensors_Init())
+    {
+        UartCmd_PrintGeneral("FAILED TO INITIALIZE SENSORS\r\n");
+    }
+
+    if (!LSM6DSV16X_Read_Ready())
+    {
+        UartCmd_PrintGeneral("READ READY ERR\r\n");
+    }
+
     UartCmd_Init();
+    LSM6DSV16X_Sample *_LSM6DSV16X_Sample;
+    static uint32_t data_print_interval_ms = 100;
+    static uint32_t data_print_counter_ms;
     /* USER CODE END 2 */
 
     /* Infinite loop */
@@ -131,6 +145,25 @@ int main(void)
             UartCmd_PrintStatus();
         }
         UartCmd_ProcessPending();
+
+        if (led_tick_due)
+        {
+            led_tick_due = false;
+            Led_TimerTick();
+        }
+
+        if (LSM6DSV16X_sample_due)
+        {
+            LSM6DSV16X_sample_due = false;
+            data_print_counter_ms += 50;
+            if (data_print_counter_ms >= data_print_interval_ms)
+            {
+                data_print_counter_ms = 0;
+                _LSM6DSV16X_Sample = LSM6DSV16X_ReadData();
+                UartCmd_PrintLSM6DSV16XDataCSV(_LSM6DSV16X_Sample);
+                // UartCmd_PrintLSM6DSV16XData(LSM6DSV16X_Data);
+            }
+        }
         /* USER CODE END WHILE */
 
         /* USER CODE BEGIN 3 */
