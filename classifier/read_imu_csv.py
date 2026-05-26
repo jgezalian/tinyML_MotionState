@@ -1,11 +1,13 @@
 import serial
 import time
 
-PORT = "/dev/cu.usbmodem11203"  # replace with your actual port
+PORT = "/dev/cu.usbmodem1103"  # replace with your actual port
 BAUD = 115200
-LABEL = "stationary"
+LABEL = "commute"
+duration_sec = 60
+end_time = time.time() + duration_sec
 
-outfile = f"{LABEL}_{int(time.time())}.csv"
+outfile = f"./drive_data/{LABEL}.csv"
 
 with serial.Serial(PORT, BAUD, timeout=1) as ser, open(outfile, "w") as f:
     print(f"Recording to {outfile}. Press Ctrl+C to stop.")
