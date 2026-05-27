@@ -49,10 +49,21 @@
 #define LSM6DSV16X_OUTZ_L_A 0x2C
 #define LSM6DSV16X_OUTZ_H_A 0x2D
 
+#define LPS22DF_CTRL1 0x10
+#define LPS22DF_STATUS_REG 0x27
+#define LPS22DF_PRESS_OUT_XL 0x28
+#define LPS22DF_PRESS_OUT_L 0x29
+#define LPS22DF_PRESS_OUT_H 0x2A
+
 // linear accel sensitivity
 #define LSM6DSV16X_LA_SO 0.061f
 // angular rate sensitivity
 #define LSM6DSV16X_G_SO 8.75f
+
+// pressure sensitivity
+#define LPS22DF_PSENS 4096
+
+#define TWO_POW_24 16777216
 
 extern I2C_HandleTypeDef hi2c1;
 extern UART_HandleTypeDef huart2;
@@ -64,6 +75,7 @@ typedef enum
     STATUS_REG_READ_ERR,
     ACCEL_DATA_READ_ERR,
     GYRO_DATA_READ_ERR,
+    PRESS_DATA_READ_ERR,
     NONE
 } SensorErrors;
 
@@ -88,7 +100,8 @@ const char *const SensorErrorsStr[] = {[ID_MISMATCH] = "ID_MISMATCH",
                                        [READ_READY_ERR] = "READ_READY_ERR",
                                        [STATUS_REG_READ_ERR] = "STATUS_REG_READ_ERR",
                                        [ACCEL_DATA_READ_ERR] = "ACCEL_DATA_READ_ERR",
-                                       [GYRO_DATA_READ_ERR] = "GYRO_DATA_READ_ERR"};
+                                       [GYRO_DATA_READ_ERR] = "GYRO_DATA_READ_ERR",
+                                       [PRESS_DATA_READ_ERR] = "PRESS_DATA_READ_ERR"};
 const char *const SensorsStr[] = {[LSM6DSV16X] = "LSM6DSV16X", [LPS22DF] = "LPS22DF", [SHT40_AD1B] = "SHT40_AD1B"};
 const char *const HAL_StatusStr[] = {
     [HAL_OK] = "HAL_OK", [HAL_ERROR] = "HAL_ERROR", [HAL_BUSY] = "HAL_BUSY", [HAL_TIMEOUT] = "HAL_TIMEOUT"};
@@ -103,7 +116,7 @@ struct SensorCodes LSM6DSV16X_SensorCodes = {LSM6DSV16X, NONE, -1, -1};
 struct SensorCodes LPS22DF_SensorCodes = {LPS22DF, NONE, -1, -1};
 struct SensorCodes SHT40_AD1B_SensorCodes = {SHT40_AD1B, NONE, -1, -1};
 
-float LSM6DSV16X_Data[6] = {0, 0, 0, 0, 0, 0};
+// float LSM6DSV16X_Data[6] = {0, 0, 0, 0, 0, 0};
 LSM6DSV16X_Sample _LSM6DSV16X_Sample = {0};
 
 void CALC_SHT40_AD1B_CRC(uint8_t *data, uint8_t *crc, uint8_t num_bytes)
@@ -272,6 +285,22 @@ bool LSM6DSV16X_Read_Ready()
     return true;
 }
 
+bool LPS22DF_Read_Ready()
+{
+    // set ODR = 50hz
+    uint8_t tx_byte = 0x2F;
+
+    if (HAL_I2C_Mem_Write(&hi2c1, LPS22DF_ADD, LPS22DF_CTRL1, 1, &tx_byte, 1, 100) != HAL_OK)
+    {
+        LPS22DF_SensorCodes.SensorError = READ_READY_ERR;
+        Sensor_StatusToString(&LPS22DF_SensorCodes);
+        UartCmd_PrintSensorStatus(SensorStatuses);
+        return false;
+    }
+
+    return true;
+}
+
 LSM6DSV16X_Sample *LSM6DSV16X_ReadData()
 {
 
@@ -401,4 +430,48 @@ LSM6DSV16X_Sample *LSM6DSV16X_ReadData()
     }
 
     return &_LSM6DSV16X_Sample;
+}
+
+float LPS22DF_ReadData()
+{
+    uint8_t status = 0;
+    uint8_t PressDataH;
+    uint8_t PressDataL;
+    uint8_t PressDataXL;
+    int32_t data = 0;
+    float pressure = 0;
+
+    if (HAL_I2C_Mem_Read(&hi2c1, LPS22DF_ADD, LPS22DF_STATUS_REG, 1, &status, 1, 100) != HAL_OK)
+    {
+        LPS22DF_SensorCodes.SensorError = STATUS_REG_READ_ERR;
+    }
+
+    if (status & 0x01)
+    {
+        if (HAL_I2C_Mem_Read(&hi2c1, LPS22DF_ADD, LPS22DF_PRESS_OUT_XL, 1, &PressDataXL, 1, 100) != HAL_OK)
+        {
+            LPS22DF_SensorCodes.SensorError = PRESS_DATA_READ_ERR;
+        }
+
+        if (HAL_I2C_Mem_Read(&hi2c1, LPS22DF_ADD, LPS22DF_PRESS_OUT_L, 1, &PressDataL, 1, 100) != HAL_OK)
+        {
+            LPS22DF_SensorCodes.SensorError = PRESS_DATA_READ_ERR;
+        }
+
+        if (HAL_I2C_Mem_Read(&hi2c1, LPS22DF_ADD, LPS22DF_PRESS_OUT_H, 1, &PressDataH, 1, 100) != HAL_OK)
+        {
+            LPS22DF_SensorCodes.SensorError = PRESS_DATA_READ_ERR;
+        }
+
+        data = (PressDataH << 16) | (PressDataL << 8) | (PressDataXL);
+
+        if (data & 0x800000)
+        {
+            data -= TWO_POW_24;
+        }
+
+        pressure = (float)data / LPS22DF_PSENS;
+    }
+
+    return pressure;
 }

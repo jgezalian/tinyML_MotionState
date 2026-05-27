@@ -127,9 +127,17 @@ void UartCmd_PrintLSM6DSV16XData(float *data)
     HAL_UART_Transmit(&huart2, (uint8_t *)tx_buffer, (uint16_t)n, 100);
 }
 
-void UartCmd_PrintLSM6DSV16XDataCSV(const LSM6DSV16X_Sample *LSM6DSV16X_Sample)
+void UartCmd_PrintLPS22DFData(float data)
 {
-    char *str = "%lu,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f\r\n";
+    char *str = "\r\npressure: %.4f\r\n";
+    char tx_buffer[32];
+    int n = snprintf(tx_buffer, sizeof(tx_buffer), str, data);
+    HAL_UART_Transmit(&huart2, (uint8_t *)tx_buffer, (uint16_t)n, 100);
+}
+
+void UartCmd_PrintSensorDataCSV(const LSM6DSV16X_Sample *LSM6DSV16X_Sample, const float LPS22DFSample)
+{
+    char *str = "%lu,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f\r\n";
     uint32_t timestamp = HAL_GetTick();
     char tx_buffer[160];
     float ax_g = LSM6DSV16X_Sample->ax_g;
@@ -138,7 +146,8 @@ void UartCmd_PrintLSM6DSV16XDataCSV(const LSM6DSV16X_Sample *LSM6DSV16X_Sample)
     float dps_x = LSM6DSV16X_Sample->dps_x;
     float dps_y = LSM6DSV16X_Sample->dps_y;
     float dps_z = LSM6DSV16X_Sample->dps_z;
-    int n = snprintf(tx_buffer, sizeof(tx_buffer), str, timestamp, ax_g, ay_g, az_g, dps_x, dps_y, dps_z);
+    int n =
+        snprintf(tx_buffer, sizeof(tx_buffer), str, timestamp, ax_g, ay_g, az_g, dps_x, dps_y, dps_z, LPS22DFSample);
 
     if (n > 0 && n < sizeof(tx_buffer))
     {

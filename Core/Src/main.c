@@ -69,10 +69,12 @@ static void MX_TIM2_Init(void);
 /* USER CODE BEGIN 0 */
 
 volatile bool LSM6DSV16X_sample_due = false;
+volatile bool LPS22DF_sample_due = false;
 volatile bool led_tick_due = false;
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
     LSM6DSV16X_sample_due = true;
+    LPS22DF_sample_due = true;
     led_tick_due = true;
 }
 
@@ -125,12 +127,18 @@ int main(void)
 
     if (!LSM6DSV16X_Read_Ready())
     {
-        UartCmd_PrintGeneral("READ READY ERR\r\n");
+        UartCmd_PrintGeneral("LSM6DSV16X READ READY ERR\r\n");
+    }
+
+    if (!LPS22DF_Read_Ready())
+    {
+        UartCmd_PrintGeneral("LPS22DF READ READY ERR\r\n");
     }
 
     UartCmd_Init();
     LSM6DSV16X_Sample *_LSM6DSV16X_Sample;
-    static uint32_t data_print_interval_ms = 100;
+    float LPS22DF_Sample = 0;
+    static uint32_t data_print_interval_ms = 50;
     static uint32_t data_print_counter_ms;
     /* USER CODE END 2 */
 
@@ -152,16 +160,18 @@ int main(void)
             Led_TimerTick();
         }
 
-        if (LSM6DSV16X_sample_due)
+        if (LSM6DSV16X_sample_due && LPS22DF_sample_due)
         {
             LSM6DSV16X_sample_due = false;
-            data_print_counter_ms += 50;
+            LPS22DF_sample_due = false;
+            data_print_counter_ms += 20;
             if (data_print_counter_ms >= data_print_interval_ms)
             {
                 data_print_counter_ms = 0;
                 _LSM6DSV16X_Sample = LSM6DSV16X_ReadData();
-                UartCmd_PrintLSM6DSV16XDataCSV(_LSM6DSV16X_Sample);
-                // UartCmd_PrintLSM6DSV16XData(LSM6DSV16X_Data);
+                LPS22DF_Sample = LPS22DF_ReadData();
+                // UartCmd_PrintLPS22DFData(LPS22DF_Sample);
+                UartCmd_PrintSensorDataCSV(_LSM6DSV16X_Sample, LPS22DF_Sample);
             }
         }
         /* USER CODE END WHILE */
@@ -280,7 +290,7 @@ static void MX_TIM2_Init(void)
     htim2.Instance = TIM2;
     htim2.Init.Prescaler = 47999;
     htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
-    htim2.Init.Period = 49;
+    htim2.Init.Period = 19;
     htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
     htim2.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
     if (HAL_TIM_Base_Init(&htim2) != HAL_OK)
