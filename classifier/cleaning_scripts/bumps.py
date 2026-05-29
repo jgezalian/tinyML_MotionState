@@ -2,7 +2,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 
-csv = "./drive_data/raw/bumps.csv"
+csv = "../drive_data/raw/bumps/bumps.csv"
 df = pd.read_csv(csv)
 time_col = "timestamp"
 df["time_sec"] = (df[time_col] - df[time_col].iloc[0]) / 1000
@@ -32,7 +32,7 @@ for bump_id, (start, end) in enumerate(ranges):
 
 new_df = pd.concat(segments, ignore_index=True)
 
-new_df.to_csv("drive_data/clean/bumps.csv", index=False)
+new_df.to_csv("../drive_data/clean/bumps/bumps.csv")
 
 fig = plt.figure()
 fig.canvas.manager.set_window_title('bump_a_z_clean')
