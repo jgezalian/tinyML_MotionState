@@ -1,4 +1,4 @@
-index,timestamp,a_x,a_y,a_z,dps_x,dps_y,dps_z,pressure,target,time_sec,turn_id,turn_time_sec
+,timestamp,a_x,a_y,a_z,dps_x,dps_y,dps_z,pressure,target,time_sec,turn_id,turn_time_sec
 0,6002,0.0114,0.0207,1.0002,0.3325,0.3938,0.245,1001.1096,left_turn,0.0,0,0.0
 1,6062,0.0188,0.0185,0.9923,0.14,0.0175,0.1575,1001.1196,left_turn,0.06,0,0.06
 2,6122,0.0205,0.0122,0.9938,0.105,0.0088,0.2275,1001.1179,left_turn,0.12,0,0.12

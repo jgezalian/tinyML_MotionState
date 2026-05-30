@@ -14,30 +14,31 @@ peak_indices = peaks[0]
 ranges = []
 for peak_index in peak_indices:
 
-    #left valley
+    # left valley
     going_up = 0
     cur = peak_index
-    while(going_up < 5 and cur > 0):
+    while going_up < 5 and cur > 0:
         left = cur - 1
-        if(df.iloc[left]["dps_z"] > df.iloc[cur]["dps_z"]):
+        if df.iloc[left]["dps_z"] > df.iloc[cur]["dps_z"]:
             going_up += 1
-        else: going_up = 0
+        else:
+            going_up = 0
         cur -= 1
     left_bound = cur
-    
-    
-    #right valley
+
+    # right valley
     going_up = 0
     cur = peak_index
-    while(going_up < 5 and cur < len(df) - 1):
+    while going_up < 5 and cur < len(df) - 1:
         right = cur + 1
-        if(df.iloc[right]["dps_z"] > df.iloc[cur]["dps_z"]):
+        if df.iloc[right]["dps_z"] > df.iloc[cur]["dps_z"]:
             going_up += 1
-        else: going_up = 0
+        else:
+            going_up = 0
         cur += 1
     right_bound = cur
-    ranges.append((left_bound,right_bound))
-    
+    ranges.append((left_bound, right_bound))
+
 turns = []
 for turn_id, (start, end) in enumerate(ranges):
     turn = df.iloc[start : end + 1].copy()
@@ -48,16 +49,19 @@ for turn_id, (start, end) in enumerate(ranges):
 new_df = pd.concat(turns, ignore_index=True)
 new_df.to_csv("../drive_data/clean/left_turn/left_turn.csv")
 
-fig = plt.figure()
-fig.canvas.manager.set_window_title('left_turn_clean')
-for turn_id, turn in new_df.groupby("turn_id"):
-    plt.plot(turn["turn_time_sec"], turn["dps_z"])
-plt.xlabel("turn_time_sec")
-plt.ylabel("dps_z")
-plt.title("left_turn_dps_z")
-plt.show()
+attributes = ["a_x", "a_y", "a_z", "dps_x", "dps_y", "dps_z"]
 
 
+def plot_all_attributes(attributes):
+    for attribute in attributes:
+        fig = plt.figure(figsize=(20, 10))
+        for turn_id, turn in new_df.groupby("turn_id"):
+            plt.plot(turn["turn_time_sec"], turn[attribute])
+        plt.xlabel("time_sec")
+        plt.ylabel(attribute)
+        plt.title(attribute)
+        fig.canvas.manager.set_window_title(attribute)
+        plt.grid(True)
+        plt.savefig(f"../drive_data/clean/left_turn/{attribute}.png")
 
-
-
+plot_all_attributes(attributes)

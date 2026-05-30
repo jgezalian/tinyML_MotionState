@@ -1,4 +1,4 @@
-index,timestamp,a_x,a_y,a_z,dps_x,dps_y,dps_z,pressure,target,time_sec
+,timestamp,a_x,a_y,a_z,dps_x,dps_y,dps_z,pressure,target,time_sec
 0,1969082,0.0154,0.0156,0.9931,0.1838,-0.1138,0.1663,1000.6179,weave,0.0
 1,1969142,0.0195,0.0175,0.9948,0.28,0.0,0.2013,1000.6165,weave,0.06
 2,1969202,0.0176,0.0171,0.992,0.21,0.0437,0.175,1000.6169,weave,0.12

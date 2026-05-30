@@ -34,11 +34,17 @@ new_df = pd.concat(segments, ignore_index=True)
 
 new_df.to_csv("../drive_data/clean/bumps/bumps.csv")
 
-fig = plt.figure()
-fig.canvas.manager.set_window_title('bump_a_z_clean')
-for bump_id, segment in new_df.groupby("bump_id"):
-    plt.plot(segment["segment_time_sec"], segment["a_z"])
-plt.xlabel("segment_time_sec")
-plt.ylabel("a_z")
-plt.title("bumps_a_z")
-plt.show()
+attributes = ["a_x", "a_y", "a_z", "dps_x", "dps_y", "dps_z"]
+
+def plot_all_attributes(attributes):
+    for attribute in attributes:
+        fig = plt.figure()
+        fig.canvas.manager.set_window_title(attribute)
+        for bump_id, segment in new_df.groupby("bump_id"):
+            plt.plot(segment["segment_time_sec"], segment[attribute])
+        plt.xlabel("segment_time_sec")
+        plt.ylabel(attribute)
+        plt.title(attribute)
+        plt.savefig(f"../drive_data/clean/bumps/{attribute}.png")
+
+plot_all_attributes(attributes)

@@ -38,22 +38,29 @@ for peak_index in peak_indices:
     right_bound = cur
     ranges.append((left_bound,right_bound))
     
-turns = []
-for turn_id, (start, end) in enumerate(ranges):
-    turn = df.iloc[start : end + 1].copy()
-    turn["uturn_id"] = turn_id
-    turn["uturn_time_sec"] = (turn["time_sec"] - turn["time_sec"].iloc[0]).round(3)
-    turns.append(turn)
+uturns = []
+for uturn_id, (start, end) in enumerate(ranges):
+    uturn = df.iloc[start : end + 1].copy()
+    uturn["uturn_id"] = uturn_id
+    uturn["uturn_time_sec"] = (uturn["time_sec"] - uturn["time_sec"].iloc[0]).round(3)
+    uturns.append(uturn)
 
-new_df = pd.concat(turns, ignore_index=True)
+new_df = pd.concat(uturns, ignore_index=True)
 new_df.to_csv("../drive_data/clean/left_u_turn/left_u_turn.csv")
 
-fig = plt.figure()
-fig.canvas.manager.set_window_title('left_u_turn_clean')
-for turn_id, turn in new_df.groupby("uturn_id"):
-    plt.plot(turn["uturn_time_sec"], turn["dps_z"])
-plt.xlabel("uturn_time_sec")
-plt.ylabel("dps_z")
-plt.title("left_u_turn_dps_z")
-plt.show()
+attributes = ["a_x", "a_y", "a_z", "dps_x", "dps_y", "dps_z"]
 
+
+def plot_all_attributes(attributes):
+    for attribute in attributes:
+        fig = plt.figure(figsize=(20, 10))
+        for uturn_id, uturn in new_df.groupby("uturn_id"):
+            plt.plot(uturn["uturn_time_sec"], uturn[attribute])
+        plt.xlabel("time_sec")
+        plt.ylabel(attribute)
+        plt.title(attribute)
+        fig.canvas.manager.set_window_title(attribute)
+        plt.grid(True)
+        plt.savefig(f"../drive_data/clean/left_u_turn/{attribute}.png")
+
+plot_all_attributes(attributes)

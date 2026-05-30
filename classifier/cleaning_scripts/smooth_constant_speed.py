@@ -9,3 +9,17 @@ df = pd.read_csv(csv)
 df["time_sec"] = (df["timestamp"] - df.iloc[0]["timestamp"]) / 1000
 
 df.to_csv("../drive_data/clean/smooth_constant_speed/smooth_constant_speed.csv", index=False)
+
+attributes = ["a_x", "a_y", "a_z", "dps_x", "dps_y", "dps_z"]
+
+def plot_all_attributes(attributes):
+    for attribute in attributes:
+        fig = plt.figure()
+        fig.canvas.manager.set_window_title(attribute)
+        plt.plot(df["time_sec"], df[attribute])
+        plt.xlabel("time_sec")
+        plt.ylabel(attribute)
+        plt.title(attribute)
+        plt.savefig(f"../drive_data/clean/smooth_constant_speed/{attribute}.png")
+
+plot_all_attributes(attributes)
