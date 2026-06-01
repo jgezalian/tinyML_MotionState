@@ -1,35 +1,23 @@
-{
-    "source_dataset": "clean_bumps.csv",
-    "segment_id": 3,
-    "label": "bump",
-
-    "duration": 0.82,
-    "num_samples": 42,
-
-    "attribute_mean": 0.03,
-    "attribute_std": 0.12,
-    "attribute_min": -0.20,
-    "attribute_max": 0.31,
-    "attribute_range": 0.51,  //max - min
-    "attribute_abs_max": 0.31,
-    "attribute_start": 0.01,
-    "attribute_end": 0.05,
-    "attribute_delta": 0.04, end - start
-    "attribute_max_peak_neighbor_diff": 0.18,
-    "attribute_min_peak_neighbor_diff": 0.18,
-    "attribute_avg_diff",
-    "attribute_max_jerk" //np.diff(a_x) / np.diff(time)
-    "attribute_min_jerk"
-    "attribute_slope_max": 2.40,
-    "attribute_slope_min": -1.90,
-    "attribute_num_peaks": 2,
-    "attribute_zero_crossings": 1,
-
-    "accel_mag_mean": 1.24,
-    "accel_mag_max": 2.38,
-    "accel_mag_range": 1.65,
-
-    "gyro_mag_mean": 4.90,
-    "gyro_mag_max": 13.20,
-    "gyro_mag_range": 12.10,
-}
+segment_id
+duration
+num_samples
+attribute_mean
+attribute_std
+attribute_min
+attribute_max
+attribute_range
+attribute_abs_max
+attribute_delta
+attribute_max_neighbor_diff
+attribute_min_neighbor_diff
+attribute_avg_diff
+attribute_slope_max
+attribute_slope_min
+attribute_num_peaks
+attribute_zero_crossings
+accel_mag_mean
+accel_mag_max
+accel_mag_range
+gyro_mag_mean
+gyro_mag_max
+gyro_mag_range

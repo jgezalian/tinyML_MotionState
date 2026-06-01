@@ -1,4 +1,4 @@
-,timestamp,a_x,a_y,a_z,dps_x,dps_y,dps_z,pressure,target,time_sec,uturn_id,uturn_time_sec
+,timestamp,a_x,a_y,a_z,dps_x,dps_y,dps_z,pressure,target,time_sec,segment_id,segment_time_sec
 0,1428902,0.013,0.0221,0.9912,0.3237,0.0875,0.3063,1000.7168,left_u_turn,0.12,0,0.0
 1,1428962,0.0146,0.0171,0.9973,0.1312,0.0525,0.2713,1000.7175,left_u_turn,0.18,0,0.06
 2,1429022,0.0132,0.019,0.9965,0.105,-0.14,0.1838,1000.7175,left_u_turn,0.24,0,0.12

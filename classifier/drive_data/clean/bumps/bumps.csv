@@ -1,4 +1,4 @@
-,timestamp,a_x,a_y,a_z,dps_x,dps_y,dps_z,pressure,target,time_sec,bump_id,segment_time_sec
+,timestamp,a_x,a_y,a_z,dps_x,dps_y,dps_z,pressure,target,time_sec,segment_id,segment_time_sec
 0,2728562,-0.0849,0.0146,0.9378,1.365,-6.3525,0.1225,1000.3811,bumps,16.68,0,0.0
 1,2728622,0.0002,-0.0093,1.0179,2.6425,-6.4313,-0.4288,1000.4033,bumps,16.74,0,0.06
 2,2728682,0.0002,-0.009,1.0639,1.6712,-5.635,-0.0175,1000.4094,bumps,16.8,0,0.12

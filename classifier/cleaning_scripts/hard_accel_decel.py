@@ -6,7 +6,7 @@ import numpy as np
 csv = "../drive_data/raw/hard_accel_decel/filtered_dps_z_hard_accel_decel.csv"
 df = pd.read_csv(csv)
 
-df["time_sec_segment"] = (df["time_sec"] - df.groupby("segment_id")["time_sec"].transform(lambda s : s.iloc[0])).round(3)
+df["segment_time_sec"] = (df["time_sec"] - df.groupby("segment_id")["time_sec"].transform(lambda s : s.iloc[0])).round(3)
 df.to_csv("../drive_data/clean/hard_accel_decel/hard_accel_decel.csv", index=False)
 
 
@@ -17,7 +17,7 @@ def plot_all_attributes(attributes):
     for attribute in attributes:
         fig = plt.figure(figsize=(20,10))
         for segment_id, segment in df.groupby("segment_id"):
-            plt.plot(segment["time_sec_segment"], segment[attribute])
+            plt.plot(segment["segment_time_sec"], segment[attribute])
         plt.xlabel("time_sec")
         plt.ylabel(attribute)
         plt.title(attribute)

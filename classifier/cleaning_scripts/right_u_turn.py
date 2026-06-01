@@ -40,8 +40,8 @@ for peak_index in peak_indices:
 uturns = []
 for uturn_id, (start, end) in enumerate(ranges):
     uturn = df.iloc[start : end + 1].copy()
-    uturn["uturn_id"] = uturn_id
-    uturn["uturn_time_sec"] = (uturn["time_sec"] - uturn["time_sec"].iloc[0]).round(3)
+    uturn["segment_id"] = uturn_id
+    uturn["segment_time_sec"] = (uturn["time_sec"] - uturn["time_sec"].iloc[0]).round(3)
     uturns.append(uturn)
 
 new_df = pd.concat(uturns, ignore_index=True)
@@ -53,8 +53,8 @@ attributes = ["a_x", "a_y", "a_z", "dps_x", "dps_y", "dps_z"]
 def plot_all_attributes(attributes):
     for attribute in attributes:
         fig = plt.figure(figsize=(20, 10))
-        for uturn_id, uturn in new_df.groupby("uturn_id"):
-            plt.plot(uturn["uturn_time_sec"], uturn[attribute])
+        for uturn_id, uturn in new_df.groupby("segment_id"):
+            plt.plot(uturn["segment_time_sec"], uturn[attribute])
         plt.xlabel("time_sec")
         plt.ylabel(attribute)
         plt.title(attribute)

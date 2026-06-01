@@ -25,7 +25,7 @@ segments = []
 for bump_id, (start, end) in enumerate(ranges):
     segment = df.iloc[start:end + 1].copy()
 
-    segment["bump_id"] = bump_id
+    segment["segment_id"] = bump_id
     segment["segment_time_sec"] = round(segment["time_sec"] - segment["time_sec"].iloc[0], 3)
 
     segments.append(segment)
@@ -40,7 +40,7 @@ def plot_all_attributes(attributes):
     for attribute in attributes:
         fig = plt.figure()
         fig.canvas.manager.set_window_title(attribute)
-        for bump_id, segment in new_df.groupby("bump_id"):
+        for bump_id, segment in new_df.groupby("segment_id"):
             plt.plot(segment["segment_time_sec"], segment[attribute])
         plt.xlabel("segment_time_sec")
         plt.ylabel(attribute)

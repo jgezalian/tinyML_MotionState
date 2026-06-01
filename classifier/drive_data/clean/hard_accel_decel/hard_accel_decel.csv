@@ -1,4 +1,4 @@
-index,timestamp,a_x,a_y,a_z,dps_x,dps_y,dps_z,pressure,target,time_sec,segment_id,time_sec_segment
+index,timestamp,a_x,a_y,a_z,dps_x,dps_y,dps_z,pressure,target,time_sec,segment_id,segment_time_sec
 0,3870962,-0.0771,0.0495,0.975,0.7525,0.945,-4.8387,1000.3528,hard_accel_decel,7.26,0,0.0
 1,3871022,-0.0954,0.0207,1.0185,0.1663,-0.1138,-3.7013,1000.3574,hard_accel_decel,7.32,0,0.06
 2,3871082,-0.1713,-0.0319,0.964,-0.665,0.2713,-2.6337,1000.354,hard_accel_decel,7.38,0,0.12
