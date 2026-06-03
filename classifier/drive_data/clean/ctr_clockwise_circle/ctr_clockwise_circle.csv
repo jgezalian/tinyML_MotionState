@@ -1,4 +1,4 @@
-index,timestamp,a_x,a_y,a_z,dps_x,dps_y,dps_z,pressure,target,time_sec
+,timestamp,a_x,a_y,a_z,dps_x,dps_y,dps_z,pressure,target,time_sec
 0,2324702,-0.0908,0.0198,0.9969,0.8575,0.35,-1.8813,1000.4929,ctr_clock_loop,0.0
 1,2324762,-0.0969,0.0182,0.9655,0.1663,0.4375,-1.4262,1000.5063,ctr_clock_loop,0.06
 2,2324822,-0.1005,-0.0032,1.0007,0.9712,0.2625,-0.7788,1000.4915,ctr_clock_loop,0.12

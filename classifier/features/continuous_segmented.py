@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 from scipy.signal import find_peaks
 
-motions = ["clockwise_circle", "ctr_clockwise_circle", "smooth_constant_speed", "weave"]
+motions = ["clockwise_circle", "ctr_clockwise_circle", "constant_speed", "weave"]
 
 attribute_list = ["a_x", "a_y", "a_z", "dps_x", "dps_y", "dps_z"]
 

@@ -1,24 +1,18 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
+from scipy.signal import find_peaks
 
-csv = "../drive_data/raw/bumps/bumps.csv"
+csv = "../drive_data/test_data/raw/bumps.csv"
 df = pd.read_csv(csv)
 time_col = "timestamp"
 df["time_sec"] = (df[time_col] - df[time_col].iloc[0]) / 1000
 df = df.copy()
-indices = df.index[df['a_z'] >= 1.25]
-median_indices = []
-group = [indices[0]]
-for index in indices[1:]:
-    if(index - group[-1] < 100):
-        group.append(index)
-    else:
-        median_indices.append(group)
-        group = [index]
 
-center_indices = [int(np.floor(np.median(group))) for group in median_indices]
-ranges = [(idx - 20, idx + 20) for idx in center_indices]
+peaks = find_peaks(df["a_z"], height=1.15, distance=50)
+peak_indices = peaks[0]
+
+ranges = [(idx - 15, idx + 15) for idx in peak_indices]
 
 segments = []
 
@@ -32,7 +26,7 @@ for bump_id, (start, end) in enumerate(ranges):
 
 new_df = pd.concat(segments, ignore_index=True)
 
-new_df.to_csv("../drive_data/clean/bumps/bumps.csv")
+new_df.to_csv("../drive_data/test_data/clean/bumps.csv")
 
 attributes = ["a_x", "a_y", "a_z", "dps_x", "dps_y", "dps_z"]
 
@@ -45,6 +39,6 @@ def plot_all_attributes(attributes):
         plt.xlabel("segment_time_sec")
         plt.ylabel(attribute)
         plt.title(attribute)
-        plt.savefig(f"../drive_data/clean/bumps/{attribute}.png")
+        plt.savefig(f"../drive_data/first_and_second_combined_clean/bumps/{attribute}.png")
 
-plot_all_attributes(attributes)
+#plot_all_attributes(attributes)

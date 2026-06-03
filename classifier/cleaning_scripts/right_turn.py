@@ -3,40 +3,37 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy.signal import find_peaks
 
-csv = "../drive_data/raw/right_turn/right_turn.csv"
+csv = "../drive_data/first_and_second_combined_raw/right_turn/right_turn.csv"
 df = pd.read_csv(csv)
 
 df["time_sec"] = (df["timestamp"] - df.iloc[0]["timestamp"]) / 1000
-peaks = find_peaks(-df["dps_z"], height=10, distance=50)
+df["dps_z_smooth"] = df["dps_z"].rolling(window=40, min_periods=1, center=True).mean()
+peaks = find_peaks(-df["dps_z_smooth"], height=10, distance=50)
 peak_indices = peaks[0]
-
 
 ranges = []
 for peak_index in peak_indices:
 
-    # left valley
-    going_down = 0
+    # left plateau
     cur = peak_index
-    while going_down < 5 and cur > 0:
-        left = cur - 1
-        if df.iloc[left]["dps_z"] < df.iloc[cur]["dps_z"]:
-            going_down += 1
-        else:
-            going_down = 0
+    max = df.iloc[peak_index]["dps_z_smooth"]
+    while (df.iloc[cur]["dps_z_smooth"] < 0) and cur > 0:
         cur -= 1
+        if df.iloc[cur]["dps_z_smooth"] < max:
+            break
+        max = df.iloc[cur]["dps_z_smooth"]
     left_bound = cur
 
-    # right valley
-    going_down = 0
+    # right plateau
     cur = peak_index
-    while going_down < 5 and cur < len(df) - 1:
-        right = cur + 1
-        if df.iloc[right]["dps_z"] < df.iloc[cur]["dps_z"]:
-            going_down += 1
-        else:
-            going_down = 0
+    max = df.iloc[peak_index]["dps_z_smooth"]
+    while (df.iloc[cur]["dps_z"] < 1) and cur < len(df) - 1:
         cur += 1
+        if df.iloc[cur]["dps_z_smooth"] < max:
+            break
+        max = df.iloc[cur]["dps_z_smooth"]
     right_bound = cur
+
     ranges.append((left_bound, right_bound))
 
 turns = []
@@ -47,6 +44,7 @@ for turn_id, (start, end) in enumerate(ranges):
     turns.append(turn)
 
 new_df = pd.concat(turns, ignore_index=True)
+new_df = new_df.drop(columns=["dps_z_smooth"])
 new_df.to_csv("../drive_data/clean/right_turn/right_turn.csv")
 
 attributes = ["a_x", "a_y", "a_z", "dps_x", "dps_y", "dps_z"]
@@ -63,5 +61,6 @@ def plot_all_attributes(attributes):
         fig.canvas.manager.set_window_title(attribute)
         plt.grid(True)
         plt.savefig(f"../drive_data/clean/right_turn/{attribute}.png")
+
 
 plot_all_attributes(attributes)

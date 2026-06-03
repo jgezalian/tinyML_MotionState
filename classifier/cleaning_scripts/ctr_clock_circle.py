@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 #ctr_clock_loop
-csv = "../drive_data/raw/ctr_clockwise_circle/ctr_clockwise_circle.csv"
+csv = "../drive_data/first_set_raw/ctr_clockwise_circle/ctr_clockwise_circle.csv"
 df = pd.read_csv(csv)
 time_col = "timestamp"
 df["time_sec"] = (df[time_col] - df[time_col].iloc[0]) / 1000

@@ -3,40 +3,28 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy.signal import find_peaks
 
-csv = "../drive_data/raw/left_turn/left_turn.csv"
+csv = "../drive_data/first_and_second_combined_raw/left_turn/left_turn.csv"
 df = pd.read_csv(csv)
 
 df["time_sec"] = (df["timestamp"] - df.iloc[0]["timestamp"]) / 1000
 peaks = find_peaks(df["dps_z"], height=10, distance=50)
 peak_indices = peaks[0]
 
-
 ranges = []
 for peak_index in peak_indices:
 
-    # left valley
-    going_up = 0
+    # left plateau
     cur = peak_index
-    while going_up < 5 and cur > 0:
-        left = cur - 1
-        if df.iloc[left]["dps_z"] > df.iloc[cur]["dps_z"]:
-            going_up += 1
-        else:
-            going_up = 0
+    while (df.iloc[cur]["dps_z"] > 1) and cur > 0:
         cur -= 1
     left_bound = cur
 
-    # right valley
-    going_up = 0
+    # right plateau
     cur = peak_index
-    while going_up < 5 and cur < len(df) - 1:
-        right = cur + 1
-        if df.iloc[right]["dps_z"] > df.iloc[cur]["dps_z"]:
-            going_up += 1
-        else:
-            going_up = 0
+    while (df.iloc[cur]["dps_z"] > 1) and cur < len(df) - 1:
         cur += 1
     right_bound = cur
+
     ranges.append((left_bound, right_bound))
 
 turns = []
@@ -63,5 +51,6 @@ def plot_all_attributes(attributes):
         fig.canvas.manager.set_window_title(attribute)
         plt.grid(True)
         plt.savefig(f"../drive_data/clean/left_turn/{attribute}.png")
+
 
 plot_all_attributes(attributes)

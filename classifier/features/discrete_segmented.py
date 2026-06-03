@@ -4,12 +4,14 @@ from scipy.signal import find_peaks
 
 motions = [
     "bumps",
-    "hard_accel_decel",
-    "left_turn",
-    "left_u_turn",
-    "right_turn",
-    "right_u_turn",
-    "smooth_accel_decel",
+    # "hard_accel",
+    # "hard_decel",
+    # "left_turn",
+    # "left_u_turn",
+    # "right_turn",
+    # "right_u_turn",
+    # "smooth_accel",
+    # "smooth_decel",
 ]
 
 attribute_list = ["a_x", "a_y", "a_z", "dps_x", "dps_y", "dps_z"]
@@ -120,9 +122,15 @@ def extract_attribute_features(segment, attribute):
         f"{attribute}_zero_crossings": zero_crossings(segment, attribute),
     }
 
+
 def magnitude(segment):
-    segment["a_mag"] = np.sqrt(segment["a_x"]**2 + segment["a_y"]**2 + segment["a_z"]**2)
-    segment["dps_mag"] = np.sqrt(segment["dps_x"]**2 + segment["dps_y"]**2 + segment["dps_z"]**2)
+    segment["a_mag"] = np.sqrt(
+        segment["a_x"] ** 2 + segment["a_y"] ** 2 + segment["a_z"] ** 2
+    )
+    segment["dps_mag"] = np.sqrt(
+        segment["dps_x"] ** 2 + segment["dps_y"] ** 2 + segment["dps_z"] ** 2
+    )
+
 
 def extract_segment_features(segment_id, segment, motion):
 
@@ -134,14 +142,14 @@ def extract_segment_features(segment_id, segment, motion):
         "duration": segment.iloc[-1]["segment_time_sec"]
         - segment.iloc[0]["segment_time_sec"],
         "num_samples": len(segment),
-        "accel_mag_mean" : segment["a_mag"].mean(),
-        "accel_mag_max" : segment["a_mag"].max(),
-        "accel_mag_min" : segment["a_mag"].min(),
+        "accel_mag_mean": segment["a_mag"].mean(),
+        "accel_mag_max": segment["a_mag"].max(),
+        "accel_mag_min": segment["a_mag"].min(),
         "accel_mag_range": segment["a_mag"].max() - segment["a_mag"].min(),
-        "dps_mag_mean" : segment["dps_mag"].mean(),
-        "dps_mag_max" : segment["dps_mag"].max(),
-        "dps_mag_min" : segment["dps_mag"].min(),
-        "dps_mag_range" : segment["dps_mag"].max() - segment["dps_mag"].min()
+        "dps_mag_mean": segment["dps_mag"].mean(),
+        "dps_mag_max": segment["dps_mag"].max(),
+        "dps_mag_min": segment["dps_mag"].min(),
+        "dps_mag_range": segment["dps_mag"].max() - segment["dps_mag"].min(),
     }
 
     for attribute in attribute_list:
@@ -152,9 +160,23 @@ def extract_segment_features(segment_id, segment, motion):
 
 features_rows = []
 for motion in motions:
-    df = pd.read_csv(f"../drive_data/clean/{motion}/{motion}.csv")
+    if motion == "hard_accel":
+        df = pd.read_csv(f"../drive_data/clean/hard_accel_decel/accel/accel.csv")
+
+    elif motion == "hard_decel":
+        df = pd.read_csv(f"../drive_data/clean/hard_accel_decel/decel/decel.csv")
+
+    elif motion == "smooth_accel":
+        df = pd.read_csv(f"../drive_data/clean/smooth_accel_decel/accel/accel.csv")
+
+    elif motion == "smooth_decel":
+        df = pd.read_csv(f"../drive_data/clean/smooth_accel_decel/decel/decel.csv")
+
+    else:
+        df = pd.read_csv(f"../drive_data/test_data/clean/bumps.csv")
+
     for segment_id, segment in df.groupby("segment_id"):
         features_rows.append(extract_segment_features(segment_id, segment, motion))
 
 features_df = pd.DataFrame(features_rows)
-features_df.to_csv("discrete.csv")
+features_df.to_csv("bump_test_features.csv")

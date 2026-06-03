@@ -3,10 +3,13 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy.signal import find_peaks
 
-csv = "../drive_data/raw/right_u_turn/right_u_turn.csv"
+csv = "../drive_data/first_and_second_combined_raw/right_u_turn/right_u_turn.csv"
 df = pd.read_csv(csv)
 
+
+
 df["time_sec"] = (df["timestamp"] - df.iloc[0]["timestamp"]) / 1000
+
 peaks = find_peaks(-df["dps_z"], height=10, distance=100)
 peak_indices = peaks[0]
 
@@ -14,28 +17,22 @@ ranges = []
 for peak_index in peak_indices:
 
     #left plateau
-    going_down = 0
     cur = peak_index
-    while(going_down < 6 and cur > 0):
-        left = cur - 1
-        if(df.iloc[left]["dps_z"] < df.iloc[cur]["dps_z"]):
-            going_down += 1
-        else: going_down = 0
+    while(df.iloc[cur]["dps_z"] < 0):
         cur -= 1
     left_bound = cur
     
     
     #right plateau
-    going_down = 0
     cur = peak_index
-    while(going_down < 6 and cur < len(df) - 1):
-        right = cur + 1
-        if(df.iloc[right]["dps_z"] < df.iloc[cur]["dps_z"]):
-            going_down += 1
-        else: going_down = 0
+    while(df.iloc[cur]["dps_z"] < 0):
         cur += 1
     right_bound = cur
+
+
     ranges.append((left_bound,right_bound))
+
+print(ranges)
     
 uturns = []
 for uturn_id, (start, end) in enumerate(ranges):
