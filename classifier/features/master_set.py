@@ -1,20 +1,26 @@
 import pandas as pd
 
-discrete = pd.read_csv("discrete.csv")
-continuous = pd.read_csv("continuous.csv")
-bumps = pd.read_csv("bump_test_features.csv")
+discrete_test = pd.read_csv("./test/discrete_features.csv")
+discrete_train = pd.read_csv("./train/discrete_features.csv")
+continuous_test = pd.read_csv("./test/continuous_features.csv")
+continuous_train = pd.read_csv("./train/continuous_features.csv")
 
 # Remove exported index column
-#discrete = discrete.drop(columns=["Unnamed: 0"], errors="ignore")
-#continuous = continuous.drop(columns=["Unnamed: 0"], errors="ignore")
-bumps = bumps.drop(columns=["Unnamed: 0"], errors="ignore")
+discrete_test = discrete_test.drop(columns=["Unnamed: 0"], errors="ignore")
+discrete_train = discrete_train.drop(columns=["Unnamed: 0"], errors="ignore")
+continuous_test = continuous_test.drop(columns=["Unnamed: 0"], errors="ignore")
+continuous_train = continuous_train.drop(columns=["Unnamed: 0"], errors="ignore")
+
 
 # Optional but recommended for first model:
 # remove incomplete continuous windows
-#continuous = continuous[continuous["num_samples"] == 40].copy()
+# continuous = continuous[continuous["num_samples"] == 40].copy()
 
-#master = pd.concat([discrete, continuous], ignore_index=True)
+master_test = pd.concat([discrete_test, continuous_test], ignore_index=True)
+master_train = pd.concat([discrete_train, continuous_train], ignore_index=True)
 metadata_cols = ["source_dataset", "segment_id"]
 
-X = bumps.drop(columns=metadata_cols)
-X.to_csv("bumps_test_ready.csv", index=False)
+X_train = master_train.drop(columns=metadata_cols)
+X_test = master_test.drop(columns=metadata_cols)
+X_train.to_csv("./train/master_train_features.csv", index=False)
+X_test.to_csv("./test/master_test_features.csv", index=False)
