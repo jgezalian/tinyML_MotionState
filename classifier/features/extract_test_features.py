@@ -30,6 +30,7 @@ for motion in discrete_motions:
         discrete_feature_rows.append(
             discrete_segmented.extract_segment_features(segment_id, segment, motion)
         )
+discrete_feature_rows = [row for window in discrete_feature_rows for row in window]
 
 continuous_feature_rows = []
 for motion in continuous_motions:

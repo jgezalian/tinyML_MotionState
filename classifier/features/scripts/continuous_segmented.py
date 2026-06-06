@@ -154,11 +154,11 @@ def extract_segment_features(segment_id, segment, motion):
 
     magnitude(segment)
     row = {
-        "source_dataset": f"clean/{motion}.csv",
-        "segment_id": segment_id,
+        #"source_dataset": f"clean/{motion}.csv",
+        #"segment_id": segment_id,
         "label": motion,
-        "duration": segment.iloc[-1]["time_sec"] - segment.iloc[0]["time_sec"],
-        "num_samples": len(segment),
+        #"duration": segment.iloc[-1]["time_sec"] - segment.iloc[0]["time_sec"],
+        #"num_samples": len(segment),
         "accel_mag_mean": segment["a_mag"].mean(),
         "accel_mag_max": segment["a_mag"].max(),
         "accel_mag_min": segment["a_mag"].min(),
@@ -180,8 +180,10 @@ def time_split(df):
     segments = []
     indices = df.index[df["time_sec"] % 1.2 < eps]
     for iter, index in enumerate(indices):
-        # 2.4 sec segments
-        segment = df.iloc[index : index + 40]
+        # 1.2 sec segments
+        if(index + 20 > len(df)):
+            break
+        segment = df.iloc[index : index + 20]
         segment["segment_id"] = iter
         segments.append(segment)
     return segments

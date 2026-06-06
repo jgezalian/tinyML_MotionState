@@ -1,5 +1,7 @@
 import numpy as np
 import pandas as pd
+import emlearn
+import json
 from sklearn.model_selection import train_test_split
 from sklearn.model_selection import cross_val_score
 from sklearn.model_selection import cross_val_predict
@@ -20,18 +22,37 @@ X = train.drop(columns=["label"])
 y = pd.read_csv(train_features_csv)["label"]
 
 X_train, X_test, y_train, y_test = train_test_split(
-    X,
-    np.ravel(y),
-    test_size=0.25,
-    random_state=0,
-    stratify=np.ravel(y)
+    X, np.ravel(y), test_size=0.10, random_state=0, stratify=np.ravel(y)
 )
 
 rnd_clf = RandomForestClassifier(
-    n_estimators=500, max_depth=5, n_jobs=-1, random_state=42, #class_weight="balanced"
+    n_estimators=50, max_depth=8, n_jobs=-1, random_state=0
 )
 
 rnd_clf.fit(X_train, (y_train))
+
+score = rnd_clf.score(test_features, test_classes)
+print(score)
+
+path = "rnd_clf.h"
+cmodel = emlearn.convert(rnd_clf, method='inline', dtype="double")
+cmodel.save(file=path, name='rnd_f')
+
+meta_json = {}
+meta_json["rf"] = {
+    "n_estimators": rnd_clf.n_estimators,
+    "max_depth": rnd_clf.max_depth,
+    "n_jobs": rnd_clf.n_jobs,
+    "random_state": rnd_clf.random_state,
+}
+meta_json["n_features"] = len(rnd_clf.feature_names_in_.tolist())
+meta_json["features"] = rnd_clf.feature_names_in_.tolist()
+
+meta_json["n_classes"] = len((rnd_clf.classes_).tolist())
+meta_json["classes"] = (rnd_clf.classes_).tolist()
+
+with open("meta.json", "w", encoding="utf-8") as f:
+    json.dump(meta_json, f, ensure_ascii=False, indent=4)
 
 predicted_classes = rnd_clf.predict(test_features)
 
@@ -40,6 +61,3 @@ results = pd.DataFrame({
     "predicted": predicted_classes,
 })
 results.to_csv("predicted_classes.csv", index=False)
-
-
-

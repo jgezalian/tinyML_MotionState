@@ -23,6 +23,10 @@
 /* USER CODE BEGIN Includes */
 #include "button.h"
 #include "led.h"
+#include "model.h"
+#include "motion_features.h"
+#include "motion_sample.h"
+#include "motion_meta.h"
 #include "sensors.h"
 #include "uart_cmd.h"
 #include <stdbool.h>
@@ -136,10 +140,12 @@ int main(void)
     }
 
     UartCmd_Init();
-    LSM6DSV16X_Sample *_LSM6DSV16X_Sample;
+    LSM6DSV16X_Sample *_LSM6DSV16X_Sample = NULL;
     float LPS22DF_Sample = 0;
     static uint32_t data_print_interval_ms = 50;
     static uint32_t data_print_counter_ms;
+    Motion_Sample _Motion_Sample;
+    double* features;
     /* USER CODE END 2 */
 
     /* Infinite loop */
@@ -170,14 +176,39 @@ int main(void)
                 data_print_counter_ms = 0;
                 _LSM6DSV16X_Sample = LSM6DSV16X_ReadData();
                 LPS22DF_Sample = LPS22DF_ReadData();
+
+                _Motion_Sample.a_x = _LSM6DSV16X_Sample->ax_g;
+                _Motion_Sample.a_y = _LSM6DSV16X_Sample->ay_g;
+                _Motion_Sample.a_z = _LSM6DSV16X_Sample->az_g;
+                _Motion_Sample.dps_x = _LSM6DSV16X_Sample->dps_x;
+                _Motion_Sample.dps_y = _LSM6DSV16X_Sample->dps_y;
+                _Motion_Sample.dps_z = _LSM6DSV16X_Sample->dps_z;
+
+
+                //_LSM6DSV16X_Sample->timestamp = HAL_GetTick();
+                MotionBuffer_AddSample(_Motion_Sample);
+
+                if (MotionBuffer_ShouldClassify())
+                {
+                    Motion_Sample *ordered_window = MotionBuffer_OrderedWindow();
+
+                    features = MotionFeatures_Extract(ordered_window);
+
+                    // int32_t class_id = MotionModel_Predict(features);
+
+                    MotionBuffer_MarkClassified();
+                }
                 // UartCmd_PrintLPS22DFData(LPS22DF_Sample);
-                UartCmd_PrintSensorDataCSV(_LSM6DSV16X_Sample, LPS22DF_Sample);
+                // UartCmd_PrintSensorDataCSV(_LSM6DSV16X_Sample, LPS22DF_Sample);
             }
         }
+
+        // UartCmd_PrintPrediction(class_name);
         /* USER CODE END WHILE */
 
         /* USER CODE BEGIN 3 */
     }
+
     /* USER CODE END 3 */
 }
 

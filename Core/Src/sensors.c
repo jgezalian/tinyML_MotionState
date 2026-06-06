@@ -298,6 +298,8 @@ bool LPS22DF_Read_Ready()
         return false;
     }
 
+    UartCmd_PrintSensorReadReady("LPS22DF");
+
     return true;
 }
 

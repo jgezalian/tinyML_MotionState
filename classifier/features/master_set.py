@@ -18,9 +18,8 @@ continuous_train = continuous_train.drop(columns=["Unnamed: 0"], errors="ignore"
 
 master_test = pd.concat([discrete_test, continuous_test], ignore_index=True)
 master_train = pd.concat([discrete_train, continuous_train], ignore_index=True)
-metadata_cols = ["source_dataset", "segment_id"]
 
-X_train = master_train.drop(columns=metadata_cols)
-X_test = master_test.drop(columns=metadata_cols)
+X_train = master_train
+X_test = master_test
 X_train.to_csv("./train/master_train_features.csv", index=False)
 X_test.to_csv("./test/master_test_features.csv", index=False)

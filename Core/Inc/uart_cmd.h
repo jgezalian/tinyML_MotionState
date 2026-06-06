@@ -16,4 +16,5 @@ void UartCmd_PrintSensorReadReady(char *sensor_name);
 void UartCmd_PrintLSM6DSV16XData(float *data);
 void UartCmd_PrintSensorDataCSV(const LSM6DSV16X_Sample *LSM6DSV16X_Sample, const float LPS22DFSample);
 void UartCmd_PrintLPS22DFData(float data);
+void UartCmd_PrintPrediction(const char *prediction);
 #endif /* UART_CMD_H */

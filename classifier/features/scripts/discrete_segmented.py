@@ -17,7 +17,7 @@ motions = [
 attribute_list = ["a_x", "a_y", "a_z", "dps_x", "dps_y", "dps_z"]
 
 
-def range(segment, attribute):
+def val_range(segment, attribute):
     return segment[attribute].max() - segment[attribute].min()
 
 
@@ -110,7 +110,7 @@ def extract_attribute_features(segment, attribute):
         f"{attribute}_std": segment[attribute].std(),
         f"{attribute}_min": segment[attribute].min(),
         f"{attribute}_max": segment[attribute].max(),
-        f"{attribute}_range": range(segment, attribute),
+        f"{attribute}_range": val_range(segment, attribute),
         f"{attribute}_abs_max": abs_max(segment, attribute),
         f"{attribute}_delta": delta(segment, attribute),
         f"{attribute}_max_neighbor_diff": max_neighbor_diff(segment, attribute),
@@ -134,26 +134,35 @@ def magnitude(segment):
 
 def extract_segment_features(segment_id, segment, motion):
 
-    magnitude(segment)
-    row = {
-        "source_dataset": f"clean/{motion}.csv",
-        "segment_id": segment_id,
-        "label": motion,
-        "duration": segment.iloc[-1]["segment_time_sec"]
-        - segment.iloc[0]["segment_time_sec"],
-        "num_samples": len(segment),
-        "accel_mag_mean": segment["a_mag"].mean(),
-        "accel_mag_max": segment["a_mag"].max(),
-        "accel_mag_min": segment["a_mag"].min(),
-        "accel_mag_range": segment["a_mag"].max() - segment["a_mag"].min(),
-        "dps_mag_mean": segment["dps_mag"].mean(),
-        "dps_mag_max": segment["dps_mag"].max(),
-        "dps_mag_min": segment["dps_mag"].min(),
-        "dps_mag_range": segment["dps_mag"].max() - segment["dps_mag"].min(),
-    }
+    N = 20
+    rows = []
+    for start in range(0, len(segment), N):
+        window = segment.iloc[start : start + N]
 
-    for attribute in attribute_list:
-        row.update(extract_attribute_features(segment, attribute))
+        if len(window) < N:
+            break
 
-    return row
+        magnitude(window)
+        row = {
+            #"source_dataset": f"clean/{motion}.csv",
+            #"segment_id": segment_id,
+            "label": motion,
+            #"duration": window.iloc[-1]["segment_time_sec"]
+            #- window.iloc[0]["segment_time_sec"],
+            #"num_samples": len(segment),
+            "accel_mag_mean": window["a_mag"].mean(),
+            "accel_mag_max": window["a_mag"].max(),
+            "accel_mag_min": window["a_mag"].min(),
+            "accel_mag_range": window["a_mag"].max() - window["a_mag"].min(),
+            "dps_mag_mean": window["dps_mag"].mean(),
+            "dps_mag_max": window["dps_mag"].max(),
+            "dps_mag_min": window["dps_mag"].min(),
+            "dps_mag_range": window["dps_mag"].max() - window["dps_mag"].min(),
+        }
 
+        for attribute in attribute_list:
+            row.update(extract_attribute_features(window, attribute))
+
+        rows.append(row)
+
+    return rows
