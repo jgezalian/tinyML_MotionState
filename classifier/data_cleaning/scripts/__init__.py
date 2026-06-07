@@ -10,6 +10,7 @@ from . import (
     right_u_turn,
     smooth_accel_decel,
     weave,
+    stationary
 )
 
 __all__ = [
@@ -24,4 +25,5 @@ __all__ = [
     "right_u_turn",
     "smooth_accel_decel",
     "weave",
+    "stationary"
 ]

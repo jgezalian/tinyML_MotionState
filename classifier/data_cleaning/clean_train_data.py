@@ -11,6 +11,7 @@ PIPELINE = {
     "left_u_turn": left_u_turn,
     "right_turn": right_turn,
     "right_u_turn": right_u_turn,
+    "stationary" : stationary
 }
 
 motions = list(PIPELINE)

@@ -185,7 +185,6 @@ int main(void)
                 _Motion_Sample.dps_y = _LSM6DSV16X_Sample->dps_y;
                 _Motion_Sample.dps_z = _LSM6DSV16X_Sample->dps_z;
 
-                //_LSM6DSV16X_Sample->timestamp = HAL_GetTick();
                 MotionBuffer_AddSample(_Motion_Sample);
 
                 if (MotionBuffer_ShouldClassify())
@@ -199,7 +198,6 @@ int main(void)
                     UartCmd_PrintPrediction(class_name);
                     MotionBuffer_MarkClassified();
                 }
-                // UartCmd_PrintLPS22DFData(LPS22DF_Sample);
                 // UartCmd_PrintSensorDataCSV(_LSM6DSV16X_Sample, LPS22DF_Sample);
             }
         }

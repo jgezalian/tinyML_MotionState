@@ -18,6 +18,7 @@ continuous_motions = [
     "clockwise_circle",
     "ctr_clockwise_circle",
     "constant_speed",
+    "stationary"
 ]
 
 attribute_list = ["a_x", "a_y", "a_z", "dps_x", "dps_y", "dps_z"]
