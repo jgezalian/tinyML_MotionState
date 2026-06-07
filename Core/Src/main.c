@@ -198,7 +198,7 @@ int main(void)
                     UartCmd_PrintPrediction(class_name);
                     MotionBuffer_MarkClassified();
                 }
-                // UartCmd_PrintSensorDataCSV(_LSM6DSV16X_Sample, LPS22DF_Sample);
+                //UartCmd_PrintSensorDataCSV(_LSM6DSV16X_Sample, LPS22DF_Sample);
             }
         }
 

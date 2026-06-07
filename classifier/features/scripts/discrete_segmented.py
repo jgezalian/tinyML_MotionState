@@ -129,7 +129,7 @@ def magnitude(segment):
 
 def extract_segment_features(segment_id, segment, motion):
 
-    N = 20
+    N = 30
     rows = []
     for start in range(0, len(segment), N):
         window = segment.iloc[start : start + N]

@@ -1,8 +1,7 @@
 #include "motion_sample.h"
+#include "motion_meta.h"
 #include "sensors.h"
 
-#define WINDOW_SIZE 20
-#define STRIDE_SIZE 10
 
 static Motion_Sample buffer[WINDOW_SIZE];
 

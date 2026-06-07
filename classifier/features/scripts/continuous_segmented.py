@@ -169,10 +169,11 @@ def time_split(df):
     segments = []
     indices = df.index[df["time_sec"] % 1.2 < eps]
     for iter, index in enumerate(indices):
-        # 1.2 sec segments
-        if index + 20 > len(df):
+        # N sample segments
+        N = 30
+        if index + N > len(df):
             break
-        segment = df.iloc[index : index + 20]
+        segment = df.iloc[index : index + N]
         segment["segment_id"] = iter
         segments.append(segment)
     return segments

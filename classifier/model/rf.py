@@ -26,7 +26,7 @@ X_train, X_test, y_train, y_test = train_test_split(
 )
 
 rnd_clf = RandomForestClassifier(
-    n_estimators=50, max_depth=8, n_jobs=-1, random_state=0
+    n_estimators=100, max_depth=7, n_jobs=-1, random_state=0, class_weight="balanced"
 )
 
 rnd_clf.fit(X_train, (y_train))

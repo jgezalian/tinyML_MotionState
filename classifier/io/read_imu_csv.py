@@ -1,7 +1,7 @@
 import serial
 import time
 
-PORT = "/dev/cu.usbmodem21103"  # replace with your actual port
+PORT = "/dev/cu.usbmodem1103"  # replace with your actual port
 BAUD = 115200
 
 LABEL = "stationary"
