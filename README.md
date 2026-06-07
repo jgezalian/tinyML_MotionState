@@ -37,6 +37,6 @@ The real-time classifier performed well on turns and u-turns, hard acceleration/
 
 For better performance, the greatest gains would likely come from increasing the sensor read rate, as well as collecting data over a variety of terrains (smooth & rough roads, banks, uphill/downhill). The classifier had the most trouble with classes where data is similar, e.g smooth_accel and stationary, where noisy data makes it difficult to distinguish between states. 
 
-
+Click the image below to see the demo video
 
 [![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/yrEuiZFjQKk/0.jpg)](https://www.youtube.com/watch?v=yrEuiZFjQKk)
