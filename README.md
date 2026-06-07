@@ -1,0 +1,1 @@
+In progress real-time driving motion classifier. Using STM32F091RC, read IMU sensor data from IKS4A1. Extract features from data and train random forest classifier in python. Export rf code to C and run on live data.
