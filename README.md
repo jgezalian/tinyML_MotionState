@@ -10,7 +10,7 @@
 
 Using an STM32 F091RC MCU and ST X-NUCLEO-IKS4A1 MEMS sensor expansion board, built a real-time embedded motion state classifier to infer driving motions with machine learning. 
 
-Collected data for driving motions from the IKS4A1 over I2C:
+Collected 6-axis IMU (acceleration/gyro) data from driving motions using IKS4A1 over I2C:
     bumps,
     clockwise_circle,
     constant_speed,
@@ -26,9 +26,9 @@ Collected data for driving motions from the IKS4A1 over I2C:
     stationary,
     weave
 
-Turn data was collected in a parking lot at low speeds, acceleration and constant speed data on a flat, medium-smooth road. 
-
 Transmitted data to host machine using UART.
+
+Turn and bumps data was collected in a parking lot at low speeds, acceleration and constant speed data on a flat, medium-smooth road. 
 
 Cleaned data and extracted 86 features using pandas and NumPy. 
 Offline classifier was trained with scikit-learn random forest, using 500 estimators and max tree depth of 10, achieving ~90% accuracy when real-time constraints were not a factor. In order to convert to real-time embedded inference, each class was segmented into discrete 30 sample windows (each sample ~60ms) to simulate sliding window data collection on the F091RC. This model was exported to embedded C using emlearn, and deployed to the board. Implemented a ring buffer to transition smoothly between states. 
