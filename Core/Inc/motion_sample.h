@@ -12,9 +12,20 @@ typedef struct
     double dps_z;
 } Motion_Sample;
 
+typedef enum
+{
+    A_X,
+    A_Y,
+    A_Z,
+    DPS_X,
+    DPS_Y,
+    DPS_Z
+} Motion_Attributes;
+
 void MotionBuffer_AddSample(Motion_Sample sample);
 bool MotionBuffer_ShouldClassify(void);
 void MotionBuffer_MarkClassified(void);
 Motion_Sample *MotionBuffer_OrderedWindow(void);
+void MotionBuffer_LoadBumpsTestWindow(void);
 
 #endif

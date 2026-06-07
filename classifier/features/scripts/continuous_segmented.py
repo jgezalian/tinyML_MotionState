@@ -35,10 +35,7 @@ def max_gradient(segment, attribute):
     segment[f"{attribute}_smooth"] = (
         segment[attribute].rolling(window=5, center=True, min_periods=1).mean()
     ).to_numpy()
-    gradient = np.gradient(
-        segment[f"{attribute}_smooth"].to_numpy(),
-        segment["time_sec"].to_numpy(),
-    )
+    gradient = np.gradient(segment[f"{attribute}"].to_numpy(), 1)
 
     return np.max(gradient)
 
@@ -47,10 +44,7 @@ def min_gradient(segment, attribute):
     segment[f"{attribute}_smooth"] = (
         segment[attribute].rolling(window=5, center=True, min_periods=1).mean()
     ).to_numpy()
-    gradient = np.gradient(
-        segment[f"{attribute}_smooth"].to_numpy(),
-        segment["time_sec"].to_numpy(),
-    )
+    gradient = np.gradient(segment[f"{attribute}"].to_numpy(), 1)
 
     return np.min(gradient)
 
@@ -67,13 +61,8 @@ def num_peaks(segment, attribute):
     return len(peaks[0])
 
 
-def zero_crossings(segment, attribute, window=5):
-    x_smooth = (
-        segment[attribute]
-        .rolling(window=window, center=True, min_periods=1)
-        .mean()
-        .to_numpy()
-    )
+def zero_crossings(segment, attribute):
+
 
     if attribute.startswith("a_"):
         deadband = 0.05  # g
@@ -108,7 +97,7 @@ def extract_attribute_features(segment, attribute):
         f"{attribute}_avg_neighbor_diff": avg_neighbor_diff(segment, attribute),
         f"{attribute}_max_gradient": max_gradient(segment, attribute),
         f"{attribute}_min_gradient": min_gradient(segment, attribute),
-        f"{attribute}_num_peaks": num_peaks(segment, attribute),
+        # f"{attribute}_num_peaks": num_peaks(segment, attribute),
         f"{attribute}_zero_crossings": zero_crossings(segment, attribute),
     }
 
@@ -136,7 +125,7 @@ def extract_attribute_features(segment, attribute):
         f"{attribute}_avg_neighbor_diff": avg_neighbor_diff(segment, attribute),
         f"{attribute}_max_gradient": max_gradient(segment, attribute),
         f"{attribute}_min_gradient": min_gradient(segment, attribute),
-        f"{attribute}_num_peaks": num_peaks(segment, attribute),
+        # f"{attribute}_num_peaks": num_peaks(segment, attribute),
         f"{attribute}_zero_crossings": zero_crossings(segment, attribute),
     }
 
@@ -154,11 +143,11 @@ def extract_segment_features(segment_id, segment, motion):
 
     magnitude(segment)
     row = {
-        #"source_dataset": f"clean/{motion}.csv",
-        #"segment_id": segment_id,
+        # "source_dataset": f"clean/{motion}.csv",
+        # "segment_id": segment_id,
         "label": motion,
-        #"duration": segment.iloc[-1]["time_sec"] - segment.iloc[0]["time_sec"],
-        #"num_samples": len(segment),
+        # "duration": segment.iloc[-1]["time_sec"] - segment.iloc[0]["time_sec"],
+        # "num_samples": len(segment),
         "accel_mag_mean": segment["a_mag"].mean(),
         "accel_mag_max": segment["a_mag"].max(),
         "accel_mag_min": segment["a_mag"].min(),
@@ -181,11 +170,9 @@ def time_split(df):
     indices = df.index[df["time_sec"] % 1.2 < eps]
     for iter, index in enumerate(indices):
         # 1.2 sec segments
-        if(index + 20 > len(df)):
+        if index + 20 > len(df):
             break
         segment = df.iloc[index : index + 20]
         segment["segment_id"] = iter
         segments.append(segment)
     return segments
-
-

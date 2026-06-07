@@ -25,8 +25,8 @@
 #include "led.h"
 #include "model.h"
 #include "motion_features.h"
-#include "motion_sample.h"
 #include "motion_meta.h"
+#include "motion_sample.h"
 #include "sensors.h"
 #include "uart_cmd.h"
 #include <stdbool.h>
@@ -145,7 +145,11 @@ int main(void)
     static uint32_t data_print_interval_ms = 50;
     static uint32_t data_print_counter_ms;
     Motion_Sample _Motion_Sample;
-    double* features;
+    double *features;
+
+    MotionBuffer_LoadBumpsTestWindow();
+    Motion_Sample *ordered_window = MotionBuffer_OrderedWindow();
+    features = MotionFeatures_Extract(ordered_window);
     /* USER CODE END 2 */
 
     /* Infinite loop */
@@ -183,7 +187,6 @@ int main(void)
                 _Motion_Sample.dps_x = _LSM6DSV16X_Sample->dps_x;
                 _Motion_Sample.dps_y = _LSM6DSV16X_Sample->dps_y;
                 _Motion_Sample.dps_z = _LSM6DSV16X_Sample->dps_z;
-
 
                 //_LSM6DSV16X_Sample->timestamp = HAL_GetTick();
                 MotionBuffer_AddSample(_Motion_Sample);

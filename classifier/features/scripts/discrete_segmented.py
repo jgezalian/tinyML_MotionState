@@ -46,8 +46,9 @@ def max_gradient(segment, attribute):
         segment[attribute].rolling(window=5, center=True, min_periods=1).mean()
     ).to_numpy()
     gradient = np.gradient(
-        segment[f"{attribute}_smooth"].to_numpy(),
-        segment["segment_time_sec"].to_numpy(),
+        segment[f"{attribute}"].to_numpy(),
+        1
+        #segment["segment_time_sec"].to_numpy(),
     )
 
     return np.max(gradient)
@@ -58,8 +59,9 @@ def min_gradient(segment, attribute):
         segment[attribute].rolling(window=5, center=True, min_periods=1).mean()
     ).to_numpy()
     gradient = np.gradient(
-        segment[f"{attribute}_smooth"].to_numpy(),
-        segment["segment_time_sec"].to_numpy(),
+        segment[f"{attribute}"].to_numpy(),
+        1
+        #segment["segment_time_sec"].to_numpy(),
     )
 
     return np.min(gradient)
@@ -77,14 +79,7 @@ def num_peaks(segment, attribute):
     return len(peaks[0])
 
 
-def zero_crossings(segment, attribute, window=5):
-    x_smooth = (
-        segment[attribute]
-        .rolling(window=window, center=True, min_periods=1)
-        .mean()
-        .to_numpy()
-    )
-
+def zero_crossings(segment, attribute):
     if attribute.startswith("a_"):
         deadband = 0.05  # g
     elif attribute.startswith("dps_"):
@@ -118,7 +113,7 @@ def extract_attribute_features(segment, attribute):
         f"{attribute}_avg_neighbor_diff": avg_neighbor_diff(segment, attribute),
         f"{attribute}_max_gradient": max_gradient(segment, attribute),
         f"{attribute}_min_gradient": min_gradient(segment, attribute),
-        f"{attribute}_num_peaks": num_peaks(segment, attribute),
+        #f"{attribute}_num_peaks": num_peaks(segment, attribute),
         f"{attribute}_zero_crossings": zero_crossings(segment, attribute),
     }
 
