@@ -156,9 +156,11 @@ void UartCmd_PrintSensorDataCSV(const LSM6DSV16X_Sample *LSM6DSV16X_Sample, cons
     }
 }
 
-void UartCmd_PrintPrediction(const char *prediction) {
+void UartCmd_PrintPrediction(const char *prediction)
+{
     char tx_buffer[32];
-    int n = snprintf(tx_buffer, sizeof(tx_buffer), prediction);
+    char *pred_string = "\r\n%s\r\n";
+    int n = snprintf(tx_buffer, sizeof(tx_buffer), pred_string, prediction);
     HAL_UART_Transmit(&huart2, (uint8_t *)tx_buffer, (uint16_t)n, 100);
 }
 

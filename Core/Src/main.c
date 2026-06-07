@@ -147,9 +147,6 @@ int main(void)
     Motion_Sample _Motion_Sample;
     double *features;
 
-    MotionBuffer_LoadBumpsTestWindow();
-    Motion_Sample *ordered_window = MotionBuffer_OrderedWindow();
-    features = MotionFeatures_Extract(ordered_window);
     /* USER CODE END 2 */
 
     /* Infinite loop */
@@ -197,8 +194,9 @@ int main(void)
 
                     features = MotionFeatures_Extract(ordered_window);
 
-                    // int32_t class_id = MotionModel_Predict(features);
-
+                    int32_t class_id = MotionModel_Predict(features);
+                    const char *class_name = MotionModel_ClassName(class_id);
+                    UartCmd_PrintPrediction(class_name);
                     MotionBuffer_MarkClassified();
                 }
                 // UartCmd_PrintLPS22DFData(LPS22DF_Sample);
