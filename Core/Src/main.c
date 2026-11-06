@@ -124,20 +124,34 @@ int main(void)
     HAL_TIM_Base_Start_IT(&htim2);
     Button_Init();
     Led_Init();
-    if (!Sensors_Init())
+
+    //3 tries to initialize sensors
+    bool init_ok = false;
+    for (int i = 0; i < 3; ++i)
     {
-        UartCmd_PrintGeneral("FAILED TO INITIALIZE SENSORS\r\n");
+        if (Sensors_Init() && LSM6DSV16X_Read_Ready() && LPS22DF_Read_Ready())
+        {
+            init_ok = true;
+        }
     }
 
-    if (!LSM6DSV16X_Read_Ready())
-    {
-        UartCmd_PrintGeneral("LSM6DSV16X READ READY ERR\r\n");
+    if(!init_ok) {
+        Error_Handler();
     }
+    // if (!Sensors_Init())
+    // {
+    //     UartCmd_PrintGeneral("FAILED TO INITIALIZE SENSORS\r\n");
+    // }
 
-    if (!LPS22DF_Read_Ready())
-    {
-        UartCmd_PrintGeneral("LPS22DF READ READY ERR\r\n");
-    }
+    // if (!LSM6DSV16X_Read_Ready())
+    // {
+    //     UartCmd_PrintGeneral("LSM6DSV16X READ READY ERR\r\n");
+    // }
+
+    // if (!LPS22DF_Read_Ready())
+    // {
+    //     UartCmd_PrintGeneral("LPS22DF READ READY ERR\r\n");
+    // }
 
     UartCmd_Init();
     LSM6DSV16X_Sample *_LSM6DSV16X_Sample = NULL;
@@ -198,7 +212,7 @@ int main(void)
                     UartCmd_PrintPrediction(class_name);
                     MotionBuffer_MarkClassified();
                 }
-                //UartCmd_PrintSensorDataCSV(_LSM6DSV16X_Sample, LPS22DF_Sample);
+                // UartCmd_PrintSensorDataCSV(_LSM6DSV16X_Sample, LPS22DF_Sample);
             }
         }
 
