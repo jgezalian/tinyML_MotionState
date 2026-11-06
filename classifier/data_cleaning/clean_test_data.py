@@ -16,6 +16,7 @@ PIPELINE = {
 
 motions = list(PIPELINE)
 
+#read each raw CSV into dataframe and call respective clean
 for motion in motions:
     test_data_raw_path = f"../drive_data/raw/test/{motion}"
     df = pd.read_csv(f"{test_data_raw_path}/{motion}.csv")

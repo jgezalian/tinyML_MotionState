@@ -23,6 +23,7 @@ def clean(df, train_data_clean_path):
     peaks = find_peaks(df["dps_z"], height=10, distance=50)
     peak_indices = peaks[0]
 
+
     ranges = []
     for peak_index in peak_indices:
 

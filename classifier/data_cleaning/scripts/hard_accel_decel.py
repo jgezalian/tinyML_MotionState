@@ -14,7 +14,7 @@ def plot_all_attributes(attributes, accel, decel, clean_accel_path, clean_decel_
         plt.title(attribute)
         fig.canvas.manager.set_window_title(attribute)
         plt.grid(True)
-        plt.savefig(f"{clean_decel_path}/{attribute}.png")
+        plt.savefig(f"{clean_decel_path}/{attribute}_new.png")
         plt.close()
 
         fig = plt.figure(figsize=(14, 5))
@@ -25,7 +25,7 @@ def plot_all_attributes(attributes, accel, decel, clean_accel_path, clean_decel_
         plt.title(attribute)
         fig.canvas.manager.set_window_title(attribute)
         plt.grid(True)
-        plt.savefig(f"{clean_accel_path}/{attribute}.png")
+        plt.savefig(f"{clean_accel_path}/{attribute}_new.png")
         plt.close()
 
 
@@ -43,6 +43,7 @@ def clean(df, flag):
 
     attributes = ["a_x", "a_y", "a_z", "dps_x", "dps_y", "dps_z"]
 
+    #denoise/smooth with rolling average
     df["a_x_smooth"] = df["a_x"].rolling(window=5, min_periods=1, center=True).mean()
 
     decel_peaks = find_peaks(df["a_x_smooth"], height=0.3, distance=100)
@@ -77,6 +78,8 @@ def clean(df, flag):
         while df.iloc[left]["a_x_smooth"] <= 0.05 and left > 0:
             cur = left
             left -= 1
+
+            #check for time gap from restarting data collection python script (see a_x_new.png)
             if (df.iloc[cur]["time_sec"] - df.iloc[left]["time_sec"]) > 0.5:
                 left += 1
                 break
@@ -100,7 +103,7 @@ def clean(df, flag):
     decel = pd.concat(decel_segments, ignore_index=True)
     decel["target"] = "hard_decel"
     decel = decel.drop(columns=["a_x_smooth"])
-    decel.to_csv(f"{clean_decel_path}/hard_decel.csv")
+    #decel.to_csv(f"{clean_decel_path}/hard_decel.csv")
 
     accel_segments = []
     for segment_id, (start, end) in enumerate(accel_ranges):
@@ -115,6 +118,6 @@ def clean(df, flag):
     accel = pd.concat(accel_segments, ignore_index=True)
     accel["target"] = "hard_accel"
     accel = accel.drop(columns=["a_x_smooth"])
-    accel.to_csv(f"{clean_accel_path}/hard_accel.csv")
+    #accel.to_csv(f"{clean_accel_path}/hard_accel.csv")
 
     plot_all_attributes(attributes, accel, decel, clean_accel_path, clean_decel_path)

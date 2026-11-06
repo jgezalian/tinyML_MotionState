@@ -1,0 +1,3 @@
+Most challenging and error inducing portion of the experiment was collecting clean and accurate data. For more complete and accurate classification data should be collected on a variety of terrains, and collection should be started and stopped remotely. 
+
+I don't recall why I chose a prediction window size of 30; there should be some method to decide the window/time span.

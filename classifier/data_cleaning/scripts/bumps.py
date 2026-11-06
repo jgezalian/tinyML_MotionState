@@ -22,9 +22,11 @@ def clean(df, train_data_clean_path):
     df["time_sec"] = (df[time_col] - df[time_col].iloc[0]) / 1000
     df = df.copy()
 
+    #I gathered data over a set of double bumps, hence the increased distance param to capture a single bump from the pair
     peaks = find_peaks(df["a_z"], height=1.15, distance=50)
     peak_indices = peaks[0]
 
+    #trial and error for peak offset range until I captured single bump (e.g going over front and back wheels) with 
     ranges = [(idx - 15, idx + 15) for idx in peak_indices]
 
     segments = []

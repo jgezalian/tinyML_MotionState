@@ -306,6 +306,7 @@ bool LPS22DF_Read_Ready()
 LSM6DSV16X_Sample *LSM6DSV16X_ReadData()
 {
 
+    int test = 0;
     uint8_t AccelDataH;
     uint8_t AccelDataL;
     uint8_t GyroDataH;

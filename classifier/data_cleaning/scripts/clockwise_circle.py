@@ -18,7 +18,6 @@ def plot_all_attributes(attributes, df, train_data_clean_path):
 def clean(df, train_data_clean_path):
     time_col = "timestamp"
     df["time_sec"] = (df[time_col] - df[time_col].iloc[0]) / 1000
-    # df = df[(df["time_sec"] >= 2) & (df["time_sec"] <= 115)]
     df.to_csv(f"{train_data_clean_path}/clockwise_circle.csv")
 
     attributes = ["a_x", "a_y", "a_z", "dps_x", "dps_y", "dps_z"]
