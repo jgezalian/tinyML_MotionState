@@ -78,18 +78,23 @@ void UartCmd_ProcessPending(void)
     }
 }
 
-void UartCmd_PrintGeneral(char *str)
+void UartCmd_PrintGeneral(const char *str)
 {
     char tx_buffer[strlen(str) + 1];
     int n = snprintf(tx_buffer, sizeof(tx_buffer), str);
     HAL_UART_Transmit(&huart2, (uint8_t *)tx_buffer, (uint16_t)n, 100);
 }
+
 void UartCmd_PrintStatus()
 {
     char tx_buffer[96];
     int n = snprintf(tx_buffer, sizeof(tx_buffer), "mode: %s, blink_interval: %lu\r\n", Led_ModeToString(Led_GetMode()),
                      Led_GetBlinkInterval());
     HAL_UART_Transmit(&huart2, (uint8_t *)tx_buffer, (uint16_t)n, 100);
+}
+
+void UartCmd_PrintEvent(const char * event) {
+
 }
 
 void UartCmd_PrintSensorStatus(const char **SensorStatuses)

@@ -6,6 +6,12 @@
 
 extern struct SensorCodes sensorCode;
 
+typedef enum {
+    TO_READ,
+    READ_SUCCESS,
+    READ_FAIL
+} SensorReadStatus;
+
 typedef struct
 {
     uint32_t timestamp;
@@ -17,13 +23,16 @@ typedef struct
     float dps_z;
 } LSM6DSV16X_Sample;
 
+extern LSM6DSV16X_Sample *_LSM6DSV16X_Sample_Ptr;
+
 bool Sensors_Init();
+void Attempt_Sensors_Init();
 bool LSM6DSV16X_Read_Ready();
 bool LPS22DF_Read_Ready();
 uint8_t SHT40_CRC(uint8_t *data);
 void CALC_SHT40_AD1B_CRC(uint8_t *data, uint8_t *crc, uint8_t num_bytes);
 void Sensor_StatusToString(struct SensorCodes *sensorCode);
-LSM6DSV16X_Sample *LSM6DSV16X_ReadData();
+SensorReadStatus LSM6DSV16X_ReadData();
 float LPS22DF_ReadData();
 
 #endif

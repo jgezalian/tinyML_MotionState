@@ -7,9 +7,10 @@
 void UartCmd_Init(void);
 void UartCmd_RxCompleteCallback(UART_HandleTypeDef *huart);
 void UartCmd_ProcessPending(void);
-void UartCmd_PrintGeneral(char *str);
+void UartCmd_PrintGeneral(const char *str);
 void UartCmd_PrintStatus(void);
 void UartCmd_PrintHelp(void);
+void UartCmd_PrintEvent(const char * event);
 void UartCmd_PrintSensorStatus(const char **SensorStatuses);
 void UartCmd_PrintSensorInitOk();
 void UartCmd_PrintSensorReadReady(char *sensor_name);

@@ -28,6 +28,7 @@
 #include "motion_meta.h"
 #include "motion_sample.h"
 #include "sensors.h"
+#include "sm.h"
 #include "uart_cmd.h"
 #include <stdbool.h>
 #include <stdio.h>
@@ -40,16 +41,20 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-
+#define RCC_CSR_ADDR 0x40021024UL
+#define IWDGRSTF_MASK (1UL << 29)
+#define RMVF_MASK (1UL << 24)
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
 /* USER CODE BEGIN PM */
-
+Events event = NO_EVENT;
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
 I2C_HandleTypeDef hi2c1;
+
+IWDG_HandleTypeDef hiwdg;
 
 TIM_HandleTypeDef htim2;
 
@@ -65,6 +70,7 @@ static void MX_GPIO_Init(void);
 static void MX_USART2_UART_Init(void);
 static void MX_I2C1_Init(void);
 static void MX_TIM2_Init(void);
+static void MX_IWDG_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -103,6 +109,9 @@ int main(void)
 
     /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
     HAL_Init();
+    MX_IWDG_Init();
+
+    sm_dispatch(EVENT_BOOT);
 
     /* USER CODE BEGIN Init */
 
@@ -125,41 +134,38 @@ int main(void)
     Button_Init();
     Led_Init();
 
-    //3 tries to initialize sensors
-    bool init_ok = false;
-    for (int i = 0; i < 3; ++i)
+    uint32_t csr = *(volatile uint32_t *)RCC_CSR_ADDR;
+    if ((csr & IWDGRSTF_MASK) != 0U)
     {
-        if (Sensors_Init() && LSM6DSV16X_Read_Ready() && LPS22DF_Read_Ready())
-        {
-            init_ok = true;
-        }
+        UartCmd_PrintGeneral("IWDG reset complete\r\n");
+        *(volatile uint32_t *)RCC_CSR_ADDR |= RMVF_MASK;
     }
 
-    if(!init_ok) {
+    // refresh watchdog after peripherals init
+    if (HAL_IWDG_Refresh(&hiwdg) != HAL_OK)
+    {
         Error_Handler();
     }
-    // if (!Sensors_Init())
-    // {
-    //     UartCmd_PrintGeneral("FAILED TO INITIALIZE SENSORS\r\n");
-    // }
 
-    // if (!LSM6DSV16X_Read_Ready())
-    // {
-    //     UartCmd_PrintGeneral("LSM6DSV16X READ READY ERR\r\n");
-    // }
+    sm_dispatch(EVENT_BOOT_SUCCESS);
 
-    // if (!LPS22DF_Read_Ready())
-    // {
-    //     UartCmd_PrintGeneral("LPS22DF READ READY ERR\r\n");
-    // }
+    sm_dispatch(EVENT_SENSOR_INIT);
+
+    // refresh watchdog after sensor init
+    if (HAL_IWDG_Refresh(&hiwdg) != HAL_OK)
+    {
+        Error_Handler();
+    }
+
+    sm_dispatch(EVENT_SENSOR_INIT_SUCCESS);
 
     UartCmd_Init();
-    LSM6DSV16X_Sample *_LSM6DSV16X_Sample = NULL;
-    float LPS22DF_Sample = 0;
+    // LSM6DSV16X_Sample *_LSM6DSV16X_Sample = NULL;
+    // float LPS22DF_Sample = 0;
     static uint32_t data_print_interval_ms = 50;
     static uint32_t data_print_counter_ms;
-    Motion_Sample _Motion_Sample;
-    double *features;
+    // Motion_Sample _Motion_Sample;
+    // double *features;
 
     /* USER CODE END 2 */
 
@@ -186,32 +192,54 @@ int main(void)
             LSM6DSV16X_sample_due = false;
             LPS22DF_sample_due = false;
             data_print_counter_ms += 20;
+
             if (data_print_counter_ms >= data_print_interval_ms)
             {
                 data_print_counter_ms = 0;
-                _LSM6DSV16X_Sample = LSM6DSV16X_ReadData();
-                LPS22DF_Sample = LPS22DF_ReadData();
 
-                _Motion_Sample.a_x = _LSM6DSV16X_Sample->ax_g;
-                _Motion_Sample.a_y = _LSM6DSV16X_Sample->ay_g;
-                _Motion_Sample.a_z = _LSM6DSV16X_Sample->az_g;
-                _Motion_Sample.dps_x = _LSM6DSV16X_Sample->dps_x;
-                _Motion_Sample.dps_y = _LSM6DSV16X_Sample->dps_y;
-                _Motion_Sample.dps_z = _LSM6DSV16X_Sample->dps_z;
+                sm_dispatch(EVENT_DATA_READ);
 
-                MotionBuffer_AddSample(_Motion_Sample);
-
-                if (MotionBuffer_ShouldClassify())
+                // refresh watchdog after data read
+                if (HAL_IWDG_Refresh(&hiwdg) != HAL_OK)
                 {
-                    Motion_Sample *ordered_window = MotionBuffer_OrderedWindow();
-
-                    features = MotionFeatures_Extract(ordered_window);
-
-                    int32_t class_id = MotionModel_Predict(features);
-                    const char *class_name = MotionModel_ClassName(class_id);
-                    UartCmd_PrintPrediction(class_name);
-                    MotionBuffer_MarkClassified();
+                    Error_Handler();
                 }
+
+                sm_dispatch(EVENT_CHECK_BUFFER);
+
+                //_LSM6DSV16X_Sample = LSM6DSV16X_ReadData();
+                // LPS22DF_Sample = LPS22DF_ReadData();
+
+                // _Motion_Sample.a_x = _LSM6DSV16X_Sample_Ptr->ax_g;
+                // _Motion_Sample.a_y = _LSM6DSV16X_Sample_Ptr->ay_g;
+                // _Motion_Sample.a_z = _LSM6DSV16X_Sample_Ptr->az_g;
+                // _Motion_Sample.dps_x = _LSM6DSV16X_Sample_Ptr->dps_x;
+                // _Motion_Sample.dps_y = _LSM6DSV16X_Sample_Ptr->dps_y;
+                // _Motion_Sample.dps_z = _LSM6DSV16X_Sample_Ptr->dps_z;
+
+                // MotionBuffer_AddSample(_Motion_Sample);
+
+                if (_BufferReadyToClassify == READY)
+                {
+                    sm_dispatch(EVENT_CLASSIFY);
+                }
+
+                // refresh watchdog after classify
+                if (HAL_IWDG_Refresh(&hiwdg) != HAL_OK)
+                {
+                    Error_Handler();
+                }
+
+                //
+                //                Motion_Sample *ordered_window = MotionBuffer_OrderedWindow();
+                //
+                //                features = MotionFeatures_Extract(ordered_window);
+                //
+                //                int32_t class_id = MotionModel_Predict(features);
+                //                const char *class_name = MotionModel_ClassName(class_id);
+                //                UartCmd_PrintPrediction(class_name);
+                //                MotionBuffer_MarkClassified();
+
                 // UartCmd_PrintSensorDataCSV(_LSM6DSV16X_Sample, LPS22DF_Sample);
             }
         }
@@ -238,8 +266,9 @@ void SystemClock_Config(void)
     /** Initializes the RCC Oscillators according to the specified parameters
      * in the RCC_OscInitTypeDef structure.
      */
-    RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI48;
+    RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI48 | RCC_OSCILLATORTYPE_LSI;
     RCC_OscInitStruct.HSI48State = RCC_HSI48_ON;
+    RCC_OscInitStruct.LSIState = RCC_LSI_ON;
     RCC_OscInitStruct.PLL.PLLState = RCC_PLL_NONE;
     if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
     {
@@ -314,6 +343,34 @@ static void MX_I2C1_Init(void)
 }
 
 /**
+ * @brief IWDG Initialization Function
+ * @param None
+ * @retval None
+ */
+static void MX_IWDG_Init(void)
+{
+
+    /* USER CODE BEGIN IWDG_Init 0 */
+
+    /* USER CODE END IWDG_Init 0 */
+
+    /* USER CODE BEGIN IWDG_Init 1 */
+
+    /* USER CODE END IWDG_Init 1 */
+    hiwdg.Instance = IWDG;
+    hiwdg.Init.Prescaler = IWDG_PRESCALER_16;
+    hiwdg.Init.Window = 4095;
+    hiwdg.Init.Reload = 2500;
+    if (HAL_IWDG_Init(&hiwdg) != HAL_OK)
+    {
+        Error_Handler();
+    }
+    /* USER CODE BEGIN IWDG_Init 2 */
+
+    /* USER CODE END IWDG_Init 2 */
+}
+
+/**
  * @brief TIM2 Initialization Function
  * @param None
  * @retval None
@@ -334,7 +391,7 @@ static void MX_TIM2_Init(void)
     htim2.Instance = TIM2;
     htim2.Init.Prescaler = 47999;
     htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
-    htim2.Init.Period = 19;
+    htim2.Init.Period = 49;
     htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
     htim2.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
     if (HAL_TIM_Base_Init(&htim2) != HAL_OK)
@@ -443,6 +500,8 @@ void Error_Handler(void)
     /* USER CODE BEGIN Error_Handler_Debug */
     /* User can add his own implementation to report the HAL error return state */
     __disable_irq();
+    event = EVENT_ERROR;
+    sm_dispatch(event);
     while (1)
     {
     }

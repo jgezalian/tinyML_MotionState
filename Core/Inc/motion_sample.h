@@ -22,10 +22,20 @@ typedef enum
     DPS_Z
 } Motion_Attributes;
 
-void MotionBuffer_AddSample(Motion_Sample sample);
+typedef enum {
+    NOT_READY,
+    READY
+} BufferReadyToClassify;
+
+extern BufferReadyToClassify _BufferReadyToClassify;
+
+extern Motion_Sample* _Motion_Sample;
+
+void MotionBuffer_AddSample(Motion_Sample *_Motion_Sample);
 bool MotionBuffer_ShouldClassify(void);
 void MotionBuffer_MarkClassified(void);
 Motion_Sample *MotionBuffer_OrderedWindow(void);
 void MotionBuffer_LoadBumpsTestWindow(void);
+void Motion_Sample_Load();
 
 #endif

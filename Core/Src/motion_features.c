@@ -214,7 +214,9 @@ struct axis_dps_features
     double dps_z_zero_crossings;
 };
 
+
 double features[N_FEATURES];
+double *_features = &features[0];
 static struct axis_accel_features aaf;
 static struct axis_dps_features adf;
 static struct accel_global_features agf;
@@ -886,5 +888,5 @@ double *MotionFeatures_Extract(Motion_Sample *ordered_window)
     mag_mean_min_max(ordered_window);
     mag_range(&agf, &dgf);
     load_features_array();
-    return features;
+    return _features;
 }

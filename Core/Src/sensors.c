@@ -1,5 +1,7 @@
 #include "sensors.h"
 #include "uart_cmd.h"
+#include <stdint.h>
+#include "sm.h"
 
 // STTS22H 0011 1000
 // 0111 0000
@@ -118,6 +120,7 @@ struct SensorCodes SHT40_AD1B_SensorCodes = {SHT40_AD1B, NONE, -1, -1};
 
 // float LSM6DSV16X_Data[6] = {0, 0, 0, 0, 0, 0};
 LSM6DSV16X_Sample _LSM6DSV16X_Sample = {0};
+LSM6DSV16X_Sample *_LSM6DSV16X_Sample_Ptr = NULL;
 
 void CALC_SHT40_AD1B_CRC(uint8_t *data, uint8_t *crc, uint8_t num_bytes)
 {
@@ -303,10 +306,24 @@ bool LPS22DF_Read_Ready()
     return true;
 }
 
-LSM6DSV16X_Sample *LSM6DSV16X_ReadData()
+void Attempt_Sensors_Init()
+{
+    // 3 tries to initialize sensors
+    for (int i = 0; i < 3; ++i)
+    {
+        if (Sensors_Init() && LSM6DSV16X_Read_Ready() && LPS22DF_Read_Ready())
+        {
+            sm_dispatch(EVENT_SENSOR_INIT_SUCCESS);
+            return;
+        }
+    }
+
+    Error_Handler();
+}
+
+SensorReadStatus LSM6DSV16X_ReadData()
 {
 
-    int test = 0;
     uint8_t AccelDataH;
     uint8_t AccelDataL;
     uint8_t GyroDataH;
@@ -316,6 +333,7 @@ LSM6DSV16X_Sample *LSM6DSV16X_ReadData()
     if (HAL_I2C_Mem_Read(&hi2c1, LSM6DSV16X_ADD, LSM6DSV16X_STATUS_REG, 1, &status, 1, 100) != HAL_OK)
     {
         LSM6DSV16X_SensorCodes.SensorError = STATUS_REG_READ_ERR;
+        return READ_FAIL;
     }
 
     // accel data ready
@@ -326,11 +344,13 @@ LSM6DSV16X_Sample *LSM6DSV16X_ReadData()
         if (HAL_I2C_Mem_Read(&hi2c1, LSM6DSV16X_ADD, LSM6DSV16X_OUTX_L_A, 1, &AccelDataL, 1, 100) != HAL_OK)
         {
             LSM6DSV16X_SensorCodes.SensorError = ACCEL_DATA_READ_ERR;
+            return READ_FAIL;
         }
 
         if (HAL_I2C_Mem_Read(&hi2c1, LSM6DSV16X_ADD, LSM6DSV16X_OUTX_H_A, 1, &AccelDataH, 1, 100) != HAL_OK)
         {
             LSM6DSV16X_SensorCodes.SensorError = ACCEL_DATA_READ_ERR;
+            return READ_FAIL;
         }
 
         // combine data L/H into one 16-bit word and apply sensitivity factor
@@ -344,11 +364,13 @@ LSM6DSV16X_Sample *LSM6DSV16X_ReadData()
         if (HAL_I2C_Mem_Read(&hi2c1, LSM6DSV16X_ADD, LSM6DSV16X_OUTY_L_A, 1, &AccelDataL, 1, 100) != HAL_OK)
         {
             LSM6DSV16X_SensorCodes.SensorError = ACCEL_DATA_READ_ERR;
+            return READ_FAIL;
         }
 
         if (HAL_I2C_Mem_Read(&hi2c1, LSM6DSV16X_ADD, LSM6DSV16X_OUTY_H_A, 1, &AccelDataH, 1, 100) != HAL_OK)
         {
             LSM6DSV16X_SensorCodes.SensorError = ACCEL_DATA_READ_ERR;
+            return READ_FAIL;
         }
 
         // combine data L/H into one 16-bit word and apply sensitivity factor
@@ -362,11 +384,13 @@ LSM6DSV16X_Sample *LSM6DSV16X_ReadData()
         if (HAL_I2C_Mem_Read(&hi2c1, LSM6DSV16X_ADD, LSM6DSV16X_OUTZ_L_A, 1, &AccelDataL, 1, 100) != HAL_OK)
         {
             LSM6DSV16X_SensorCodes.SensorError = ACCEL_DATA_READ_ERR;
+            return READ_FAIL;
         }
 
         if (HAL_I2C_Mem_Read(&hi2c1, LSM6DSV16X_ADD, LSM6DSV16X_OUTZ_H_A, 1, &AccelDataH, 1, 100) != HAL_OK)
         {
             LSM6DSV16X_SensorCodes.SensorError = ACCEL_DATA_READ_ERR;
+            return READ_FAIL;
         }
 
         // combine data L/H into one 16-bit word and apply sensitivity factor
@@ -384,10 +408,12 @@ LSM6DSV16X_Sample *LSM6DSV16X_ReadData()
         if (HAL_I2C_Mem_Read(&hi2c1, LSM6DSV16X_ADD, LSM6DSV16X_OUTX_L_G, 1, &GyroDataL, 1, 100) != HAL_OK)
         {
             LSM6DSV16X_SensorCodes.SensorError = GYRO_DATA_READ_ERR;
+            return READ_FAIL;
         }
         if (HAL_I2C_Mem_Read(&hi2c1, LSM6DSV16X_ADD, LSM6DSV16X_OUTX_H_G, 1, &GyroDataH, 1, 100) != HAL_OK)
         {
             LSM6DSV16X_SensorCodes.SensorError = GYRO_DATA_READ_ERR;
+            return READ_FAIL;
         }
 
         // combine data L/H into one 16-bit word and apply sensitivity factor
@@ -401,10 +427,12 @@ LSM6DSV16X_Sample *LSM6DSV16X_ReadData()
         if (HAL_I2C_Mem_Read(&hi2c1, LSM6DSV16X_ADD, LSM6DSV16X_OUTY_L_G, 1, &GyroDataL, 1, 100) != HAL_OK)
         {
             LSM6DSV16X_SensorCodes.SensorError = GYRO_DATA_READ_ERR;
+            return READ_FAIL;
         }
         if (HAL_I2C_Mem_Read(&hi2c1, LSM6DSV16X_ADD, LSM6DSV16X_OUTY_H_G, 1, &GyroDataH, 1, 100) != HAL_OK)
         {
             LSM6DSV16X_SensorCodes.SensorError = GYRO_DATA_READ_ERR;
+            return READ_FAIL;
         }
 
         // combine data L/H into one 16-bit word and apply sensitivity factor
@@ -418,10 +446,12 @@ LSM6DSV16X_Sample *LSM6DSV16X_ReadData()
         if (HAL_I2C_Mem_Read(&hi2c1, LSM6DSV16X_ADD, LSM6DSV16X_OUTZ_L_G, 1, &GyroDataL, 1, 100) != HAL_OK)
         {
             LSM6DSV16X_SensorCodes.SensorError = GYRO_DATA_READ_ERR;
+            return READ_FAIL;
         }
         if (HAL_I2C_Mem_Read(&hi2c1, LSM6DSV16X_ADD, LSM6DSV16X_OUTZ_H_G, 1, &GyroDataH, 1, 100) != HAL_OK)
         {
             LSM6DSV16X_SensorCodes.SensorError = GYRO_DATA_READ_ERR;
+            return READ_FAIL;
         }
 
         // combine data L/H into one 16-bit word and apply sensitivity factor
@@ -432,7 +462,8 @@ LSM6DSV16X_Sample *LSM6DSV16X_ReadData()
         _LSM6DSV16X_Sample.dps_z = dps_z;
     }
 
-    return &_LSM6DSV16X_Sample;
+    _LSM6DSV16X_Sample_Ptr = &_LSM6DSV16X_Sample;
+    return READ_SUCCESS;
 }
 
 float LPS22DF_ReadData()

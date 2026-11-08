@@ -9,6 +9,8 @@ struct axis_dps_features;
 struct accel_global_features;
 struct dps_global_features;
 
+extern double* _features;
+
 double *MotionFeatures_Extract(Motion_Sample *ordered_window);
 double MotionFeatures_GetSample(Motion_Attributes att, Motion_Sample *ordered_window, uint32_t index);
 void mean_min_max(Motion_Sample *ordered_window);

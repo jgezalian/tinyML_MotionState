@@ -2,8 +2,12 @@
 #include "motion_meta.h"
 #include "sensors.h"
 
+Motion_Sample MS = {0};
+Motion_Sample *_Motion_Sample = &MS;
 
 static Motion_Sample buffer[WINDOW_SIZE];
+
+BufferReadyToClassify _BufferReadyToClassify = NOT_READY;
 
 static uint32_t write_index = 0;
 static uint32_t sample_count = 0;
@@ -12,9 +16,19 @@ static bool first_prediction_done = false;
 
 Motion_Sample ordered_window[WINDOW_SIZE];
 
-void MotionBuffer_AddSample(Motion_Sample sample)
+void Motion_Sample_Load()
 {
-    buffer[write_index] = sample;
+    _Motion_Sample->a_x = _LSM6DSV16X_Sample_Ptr->ax_g;
+    _Motion_Sample->a_y = _LSM6DSV16X_Sample_Ptr->ay_g;
+    _Motion_Sample->a_z = _LSM6DSV16X_Sample_Ptr->az_g;
+    _Motion_Sample->dps_x = _LSM6DSV16X_Sample_Ptr->dps_x;
+    _Motion_Sample->dps_y = _LSM6DSV16X_Sample_Ptr->dps_y;
+    _Motion_Sample->dps_z = _LSM6DSV16X_Sample_Ptr->dps_z;
+}
+
+void MotionBuffer_AddSample(Motion_Sample *_Motion_Sample)
+{
+    buffer[write_index] = *_Motion_Sample;
 
     write_index = (write_index + 1) % WINDOW_SIZE;
 
@@ -26,6 +40,7 @@ void MotionBuffer_AddSample(Motion_Sample sample)
     new_samples_since_prediction++;
 }
 
+//initial classification will be done when buffer fills, then every 10 new samples;
 bool MotionBuffer_ShouldClassify(void)
 {
     if (sample_count < WINDOW_SIZE)
@@ -73,7 +88,7 @@ void MotionBuffer_MarkClassified(void)
 
 void MotionBuffer_LoadBumpsTestWindow(void)
 {
-    static const Motion_Sample clockwise_circle_test_samples[WINDOW_SIZE] = {
+     Motion_Sample clockwise_circle_test_samples[WINDOW_SIZE] = {
         {0.0153, 0.0207, 0.9947, 0.6037, 0.0350, 0.3850},  {0.0146, 0.0182, 0.9944, 0.2188, -0.2275, 0.2713},
         {0.0181, 0.0227, 0.9902, 0.1838, -0.1312, 0.2013}, {0.0180, 0.0232, 0.9960, 0.4638, 0.0175, 0.2275},
         {0.0176, 0.0223, 0.9914, 0.2275, -0.0175, 0.1575}, {0.0163, 0.0207, 0.9913, 0.2362, 0.0787, 0.1838},
@@ -93,6 +108,6 @@ void MotionBuffer_LoadBumpsTestWindow(void)
 
     for (uint32_t i = 0; i < WINDOW_SIZE; ++i)
     {
-        MotionBuffer_AddSample(clockwise_circle_test_samples[i]);
+        MotionBuffer_AddSample(&clockwise_circle_test_samples[i]);
     }
 }
